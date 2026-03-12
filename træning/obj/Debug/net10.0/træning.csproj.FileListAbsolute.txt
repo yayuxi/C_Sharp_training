@@ -1,0 +1,14 @@
+C:\Users\elias\RiderProjects\træning\træning\bin\Debug\net10.0\træning.exe
+C:\Users\elias\RiderProjects\træning\træning\bin\Debug\net10.0\træning.deps.json
+C:\Users\elias\RiderProjects\træning\træning\bin\Debug\net10.0\træning.runtimeconfig.json
+C:\Users\elias\RiderProjects\træning\træning\bin\Debug\net10.0\træning.dll
+C:\Users\elias\RiderProjects\træning\træning\bin\Debug\net10.0\træning.pdb
+C:\Users\elias\RiderProjects\træning\træning\obj\Debug\net10.0\træning.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\elias\RiderProjects\træning\træning\obj\Debug\net10.0\træning.AssemblyInfoInputs.cache
+C:\Users\elias\RiderProjects\træning\træning\obj\Debug\net10.0\træning.AssemblyInfo.cs
+C:\Users\elias\RiderProjects\træning\træning\obj\Debug\net10.0\træning.csproj.CoreCompileInputs.cache
+C:\Users\elias\RiderProjects\træning\træning\obj\Debug\net10.0\træning.dll
+C:\Users\elias\RiderProjects\træning\træning\obj\Debug\net10.0\refint\træning.dll
+C:\Users\elias\RiderProjects\træning\træning\obj\Debug\net10.0\træning.pdb
+C:\Users\elias\RiderProjects\træning\træning\obj\Debug\net10.0\træning.genruntimeconfig.cache
+C:\Users\elias\RiderProjects\træning\træning\obj\Debug\net10.0\ref\træning.dll
