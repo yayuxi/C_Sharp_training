@@ -5,6 +5,8 @@ class run
 {
     static void Main(string[] args)
     {
-        FizzBuzz.GetFizzBuzz();
+        //Alders_Check.AldersCheck();
+        // FizzBuzz.GetFizzBuzz();
+        NameSort.GetNameSort();
     }
 }

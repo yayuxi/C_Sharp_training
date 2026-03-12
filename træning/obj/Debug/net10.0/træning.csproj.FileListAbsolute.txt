@@ -12,3 +12,4 @@ C:\Users\elias\RiderProjects\træning\træning\obj\Debug\net10.0\refint\træning
 C:\Users\elias\RiderProjects\træning\træning\obj\Debug\net10.0\træning.pdb
 C:\Users\elias\RiderProjects\træning\træning\obj\Debug\net10.0\træning.genruntimeconfig.cache
 C:\Users\elias\RiderProjects\træning\træning\obj\Debug\net10.0\ref\træning.dll
+C:\Users\elias\RiderProjects\træning\træning\obj\Debug\net10.0\træning.sourcelink.json

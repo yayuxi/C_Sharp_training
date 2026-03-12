@@ -11,15 +11,18 @@ class Alders_Check
 
             if (age < 0) {
                 throw new Exception("Ugyldig alder! Indtast en gyldig alder.");
-            } else if (age > 150) {
+            } 
+            if (age > 150) {
                 throw new Exception("Din alder er for høj for et menneske, indtast en realistisk alder.");
             }
-    
-            if (age < 18) {
-                Console.WriteLine("Du er under 18 år og derfor ikke myndig");
-            } else {
-                Console.WriteLine("Du er myndig");
-            }
+
+            string myndig = (age < 18) ? "Du er under 18 år og derfor ikke myndig" : "Du er myndig";
+            Console.WriteLine(myndig);
+            // if (age < 18) {
+            //     Console.WriteLine("Du er under 18 år og derfor ikke myndig");
+            // } else {
+            //     Console.WriteLine("Du er myndig");
+            // }
         } catch (Exception e) {
             Console.WriteLine(e);
         }
