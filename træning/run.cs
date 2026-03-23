@@ -8,14 +8,32 @@ class run
         // AldersCheck();
         // GetFizzBuzz();
         // GetNameSort();
-        // Person AndersAnd = new Person("Anders And", 30);
-        // Person JamesBond = new Person("James Bond", 60);
-        // Person MrBeast =  new Person("Mr. Beast", 35);
+        // Person AndersAnd = new Person {
+        //     Name = "Anders And",
+        //     Age = 30
+        // };
+        // Person JamesBond = new Person {
+        //     Name = "James Bond",
+        //     Age = 60
+        // };
+        // Person MrBeast = new Person { 
+        //     Name = "Mr. Beast", 
+        //     Age = 35 
+        // };
+        // Developer LinusTorvalds = new Developer {
+        //     Name = "Linus Torvalds",
+        //     Age = 50,
+        //     FavoriteLanguage = "C++"
+        // };
         // AndersAnd.Greet();
         // JamesBond.Greet();
         // MrBeast.Greet();
+        // LinusTorvalds.Greet();
         Contact contact = new Contact("","");
-        Console.WriteLine("Velkommen til kontaktbogen! Her kan du tilføje, søge og se dine kontakter.\nIndtast 'add' for at tilføje en kontakt, 'remove' for at fjerne en kontakt, 'search' for at søge efter en kontakt, 'list' for at se alle kontakter eller 'exit' for at afslutte programmet.");
+        string instructions =
+            "Indtast 'add' for at tilføje en kontakt, 'remove' for at fjerne en kontakt, 'search' for at søge efter en kontakt, 'list' for at se alle kontakter eller 'exit' for at afslutte programmet.";
+        Console.WriteLine("Velkommen til kontaktbogen! Her kan du tilføje, søge og se dine kontakter.");
+        Console.WriteLine(instructions);
         while (true) {
             string input = Console.ReadLine();
             switch(input) {
@@ -25,23 +43,25 @@ class run
                     Console.WriteLine("Indtast emailen på kontakten:\t");
                     string email = Console.ReadLine();
                     contact.addContact(name, email);
-                    Console.WriteLine("Kontakten er tilføjet!\nIndtast 'add' for at tilføje en kontakt, 'remove' for at fjerne en kontakt, 'search' for at søge efter en kontakt, 'list' for at se alle kontakter eller 'exit' for at afslutte programmet.");
+                    Console.WriteLine("Kontakten er tilføjet!");
+                    Console.WriteLine(instructions);
                     break;
                 case "remove":
                     Console.WriteLine("Indtast navnet på kontakten du vil fjerne:\t");
                     string removeName = Console.ReadLine();
                     contact.removeContact(removeName);
-                    Console.WriteLine("Kontakten er fjernet!\nIndtast 'add' for at tilføje en kontakt, 'remove' for at fjerne en kontakt, 'search' for at søge efter en kontakt, 'list' for at se alle kontakter eller 'exit' for at afslutte programmet.");
+                    Console.WriteLine("Kontakten er fjernet!");
+                    Console.WriteLine(instructions);
                     break;
                 case "search":
                     Console.WriteLine("Indtast navnet på kontakten du vil søge efter:\t");
                     string searchName = Console.ReadLine();
                     contact.searchContact(searchName);
-                    Console.WriteLine("Indtast 'add' for at tilføje en kontakt, 'remove' for at fjerne en kontakt, 'search' for at søge efter en kontakt, 'list' for at se alle kontakter eller 'exit' for at afslutte programmet.");
+                    Console.WriteLine(instructions);
                     break;
                 case "list":
                     contact.printList();
-                    Console.WriteLine("Indtast 'add' for at tilføje en kontakt, 'remove' for at fjerne en kontakt, 'search' for at søge efter en kontakt, 'list' for at se alle kontakter eller 'exit' for at afslutte programmet.");
+                    Console.WriteLine(instructions);
                     break;
                 case "exit":
                     contact.exitProgram();
