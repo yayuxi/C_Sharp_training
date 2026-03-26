@@ -79,7 +79,7 @@ class run
      */
     private static void Main(string[] args)
     {
-        Stack stack = new Stack();
+        Stack<int> stack = new Stack<int>();
         Console.WriteLine(stack.IsEmpty());
         // Console.WriteLine(stack.Pop());
         stack.Push(1);
@@ -90,6 +90,16 @@ class run
         Console.WriteLine(stack.IsEmpty());
         Console.WriteLine(stack.Peek());
         Console.WriteLine(stack.Pop());
+        
+        Stack<string> stackList = new Stack<string>();
+        stackList.Push("Fizz");
+        stackList.Push("Buzz");
+        stackList.Push("FizzBuzz");
+        stackList.Push("Boom");
+        stackList.Push("Pow");
+        Console.WriteLine(stackList.IsEmpty());
+        Console.WriteLine(stackList.Pop());
+        Console.WriteLine(stackList.Peek());
     }
     
 

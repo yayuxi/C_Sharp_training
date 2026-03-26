@@ -1,23 +1,24 @@
 ﻿namespace træning;
 
-public class Stack
+public class Stack<T>
 {
-    private List<int> stackList = new List<int>();
+    public T field;
+    private List<T> stackList;
 
-    public void Push(int value) {
-        stackList.Add(value);
+    public void Push(T item) {
+        stackList.Add(item);
     }
 
-    public int Pop() {
+    public T Pop() {
         if (IsEmpty()) {
             throw new InvalidOperationException("Stack is empty");
         }
-        int value = stackList[stackList.Count - 1];
+        T item = stackList[stackList.Count - 1];
         stackList.RemoveAt(stackList.Count - 1);
-        return value;
+        return item;
     }
 
-    public int Peek() {
+    public T Peek() {
         if (stackList.Count == 0) {
             throw new InvalidOperationException("Stack is empty");
         }
