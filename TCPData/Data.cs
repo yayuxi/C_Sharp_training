@@ -1,5 +1,4 @@
-﻿namespace TCPData;
-using System.Collections.Generic;
+﻿namespace TCPDatas;
 
 public static class Data
 {

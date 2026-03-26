@@ -1,4 +1,5 @@
 ﻿namespace TCPExtensions;
+
 using System.Collections.Generic;
 
 public static class Extension

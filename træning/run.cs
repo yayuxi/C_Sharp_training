@@ -3,33 +3,36 @@
 
 class run
 {
-    private static void Main(string[] args)
-    {
-        // AldersCheck();
-        // GetFizzBuzz();
-        // GetNameSort();
-        // Person AndersAnd = new Person {
-        //     Name = "Anders And",
-        //     Age = 30
-        // };
-        // Person JamesBond = new Person {
-        //     Name = "James Bond",
-        //     Age = 60
-        // };
-        // Person MrBeast = new Person { 
-        //     Name = "Mr. Beast", 
-        //     Age = 35 
-        // };
-        // Developer LinusTorvalds = new Developer {
-        //     Name = "Linus Torvalds",
-        //     Age = 50,
-        //     FavoriteLanguage = "C++"
-        // };
-        // AndersAnd.Greet();
-        // JamesBond.Greet();
-        // MrBeast.Greet();
-        // LinusTorvalds.Greet();
-        Contact contact = new Contact("","");
+    /* Week 1
+    AldersCheck();
+    GetFizzBuzz();
+    GetNameSort();*/
+    
+    /* Week 2
+    Person AndersAnd = new Person {
+        Name = "Anders And",
+        Age = 30
+    };
+    Person JamesBond = new Person {
+        Name = "James Bond",
+        Age = 60
+    };
+    Person MrBeast = new Person { 
+       Name = "Mr. Beast", 
+       Age = 35 
+    };
+    Developer LinusTorvalds = new Developer {
+        Name = "Linus Torvalds",
+        Age = 50,
+        FavoriteLanguage = "C++"
+    };
+    AndersAnd.Greet();
+    JamesBond.Greet();
+    MrBeast.Greet();
+    LinusTorvalds.Greet();*/
+    
+    /* Week 3
+    Contact contact = new Contact("","");
         string instructions =
             "Indtast 'add' for at tilføje en kontakt, 'remove' for at fjerne en kontakt, 'search' for at søge efter en kontakt, 'list' for at se alle kontakter eller 'exit' for at afslutte programmet.";
         Console.WriteLine("Velkommen til kontaktbogen! Her kan du tilføje, søge og se dine kontakter.");
@@ -73,6 +76,20 @@ class run
             }
             
         }
+     */
+    private static void Main(string[] args)
+    {
+        Stack stack = new Stack();
+        Console.WriteLine(stack.IsEmpty());
+        // Console.WriteLine(stack.Pop());
+        stack.Push(1);
+        stack.Push(2);
+        stack.Push(3);
+        stack.Push(4);
+        stack.Push(5);
+        Console.WriteLine(stack.IsEmpty());
+        Console.WriteLine(stack.Peek());
+        Console.WriteLine(stack.Pop());
     }
     
 
