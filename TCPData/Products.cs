@@ -1,4 +1,4 @@
-﻿namespace TCPDatas;
+﻿namespace TCPData;
 
 public class Products
 {

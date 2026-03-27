@@ -1,5 +1,7 @@
 ﻿namespace træning;
-
+using TCPData;
+using TCPExtensions;
+using System.Linq;
 
 class run
 {
@@ -76,9 +78,33 @@ class run
             }
             
         }
-     */
-    private static void Main(string[] args)
-    {
+        
+        List<Products> productList = Data.GetProducts();
+        var mostExpensive = productList.OrderByDescending(p => p.Price).FirstOrDefault();
+        Console.WriteLine($"The most expensive product is: {mostExpensive.Name} with a price of {mostExpensive.Price} in the category {mostExpensive.Category}");
+        var filteredItems = productList.Where(p => p.Price > 1000).OrderBy(p => p.Price).GroupBy(p => p.Category);
+        foreach (var group in filteredItems)
+        {
+            foreach (var item in group)
+            {
+                Console.WriteLine($"{item.Name} - {item.Price} - {item.Category}");
+            }
+            Console.WriteLine($"There are {group.Count()} items in the category {group.Key}");
+        }
+        var people = File.ReadLines("C:\\Users\\Bruger 1\\RiderProjects\\C_Sharp_training\\træning\\people.txt");
+
+        var isPerson = people.Any(person => person.StartsWith("A"));
+        Console.WriteLine($"Is there any person that starts with 'A'? {isPerson}");
+        var result = people
+            .Where(person => person.StartsWith("A"))
+            .OrderBy(person => person);
+
+        foreach (var person in result)
+        {
+            Console.WriteLine(person);
+        }
+        
+        
         Stack<int> stack = new Stack<int>();
         Console.WriteLine(stack.IsEmpty());
         // Console.WriteLine(stack.Pop());
@@ -100,6 +126,13 @@ class run
         Console.WriteLine(stackList.IsEmpty());
         Console.WriteLine(stackList.Pop());
         Console.WriteLine(stackList.Peek());
+     */
+    private static void Main(string[] args)
+    {
+        Button button = new  Button();
+        Logger logger = new Logger(button);
+        Print print = new Print(button);
+        button.ButtonClick();
     }
     
 

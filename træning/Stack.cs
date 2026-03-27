@@ -2,8 +2,12 @@
 
 public class Stack<T>
 {
-    public T field;
     private List<T> stackList;
+    
+    public Stack()
+    {
+        stackList = new List<T>();
+    }
 
     public void Push(T item) {
         stackList.Add(item);

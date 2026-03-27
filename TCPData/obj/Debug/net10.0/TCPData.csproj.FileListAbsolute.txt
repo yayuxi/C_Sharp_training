@@ -1,0 +1,12 @@
+C:\Users\Bruger 1\RiderProjects\C_Sharp_training\TCPData\bin\Debug\net10.0\TCPData.deps.json
+C:\Users\Bruger 1\RiderProjects\C_Sharp_training\TCPData\bin\Debug\net10.0\TCPData.dll
+C:\Users\Bruger 1\RiderProjects\C_Sharp_training\TCPData\bin\Debug\net10.0\TCPData.pdb
+C:\Users\Bruger 1\RiderProjects\C_Sharp_training\TCPData\obj\Debug\net10.0\TCPData.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Bruger 1\RiderProjects\C_Sharp_training\TCPData\obj\Debug\net10.0\TCPData.AssemblyInfoInputs.cache
+C:\Users\Bruger 1\RiderProjects\C_Sharp_training\TCPData\obj\Debug\net10.0\TCPData.AssemblyInfo.cs
+C:\Users\Bruger 1\RiderProjects\C_Sharp_training\TCPData\obj\Debug\net10.0\TCPData.csproj.CoreCompileInputs.cache
+C:\Users\Bruger 1\RiderProjects\C_Sharp_training\TCPData\obj\Debug\net10.0\TCPData.sourcelink.json
+C:\Users\Bruger 1\RiderProjects\C_Sharp_training\TCPData\obj\Debug\net10.0\TCPData.dll
+C:\Users\Bruger 1\RiderProjects\C_Sharp_training\TCPData\obj\Debug\net10.0\refint\TCPData.dll
+C:\Users\Bruger 1\RiderProjects\C_Sharp_training\TCPData\obj\Debug\net10.0\TCPData.pdb
+C:\Users\Bruger 1\RiderProjects\C_Sharp_training\TCPData\obj\Debug\net10.0\ref\TCPData.dll

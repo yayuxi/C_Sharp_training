@@ -1,4 +1,4 @@
-﻿namespace TCPDatas;
+﻿namespace TCPData;
 
 public static class Data
 {
