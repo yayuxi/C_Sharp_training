@@ -3,8 +3,7 @@ using TCPData;
 using TCPExtensions;
 using System.Linq;
 
-class run
-{
+class run {
     /* Week 1
     AldersCheck();
     GetFizzBuzz();
@@ -126,18 +125,59 @@ class run
         Console.WriteLine(stackList.IsEmpty());
         Console.WriteLine(stackList.Pop());
         Console.WriteLine(stackList.Peek());
-     */
-    private static void Main(string[] args)
-    {
+        
         Button button = new  Button();
         Logger logger = new Logger(button);
         Print print = new Print(button);
         button.ButtonClick();
+     */
+    private static void Main(string[] args) {
+        Contact contact = new Contact("","");
+        string instructions =
+            "Indtast 'add' for at tilføje en kontakt, 'remove' for at fjerne en kontakt, 'search' for at søge efter en kontakt, 'list' for at se alle kontakter eller 'exit' for at afslutte programmet.";
+        Console.WriteLine("Velkommen til kontaktbogen! Her kan du tilføje, søge og se dine kontakter.");
+        Console.WriteLine(instructions);
+        while (true) {
+            string input = Console.ReadLine();
+            switch(input) {
+                case "add":
+                    Console.WriteLine("Indtast navnet på kontakten:\t");
+                    string name = Console.ReadLine();
+                    Console.WriteLine("Indtast emailen på kontakten:\t");
+                    string email = Console.ReadLine();
+                    contact.addContact(name, email);
+                    Console.WriteLine(instructions);
+                    break;
+                case "remove":
+                    Console.WriteLine("Indtast navnet på kontakten du vil fjerne:\t");
+                    string removeName = Console.ReadLine();
+                    contact.removeContact(removeName);
+                    Console.WriteLine(instructions);
+                    break;
+                case "search":
+                    Console.WriteLine("Indtast navnet på kontakten du vil søge efter:\t");
+                    string searchName = Console.ReadLine();
+                    contact.searchContact(searchName);
+                    Console.WriteLine(instructions);
+                    break;
+                case "list":
+                    contact.printList();
+                    Console.WriteLine(instructions);
+                    break;
+                case "exit":
+                    contact.exitProgram();
+                    break;
+                default:                         
+                    Console.WriteLine("Ugyldig kommando! Indtast 'add', 'search', 'list' eller 'exit'.");
+                    break;
+                
+            }
+            
+        }
     }
     
 
-    public static void GetFizzBuzz()
-    {
+    public static void GetFizzBuzz() {
         Console.WriteLine("Det er tid til FIZZBUZZ!!! woo hoo\n Vælg et tal mellem 1 og 100 og se hvad resultatet bliver:\t");
         string input = Console.ReadLine();
         try
@@ -148,20 +188,16 @@ class run
                 throw new Exception("Ugyldig tal! Indtast et tal mellem 1 og 100.");
             }
             
-            if (number % 3 == 0 && number % 5 == 0)
-            {
+            if (number % 3 == 0 && number % 5 == 0) {
                 Console.WriteLine("FizzBuzz");
             }
-            else if (number % 5 == 0)
-            {
+            else if (number % 5 == 0) {
                 Console.WriteLine("Buzz");
             }
-            else if (number % 3 == 0)
-            {
+            else if (number % 3 == 0) {
                 Console.WriteLine("Fizz");
             }
-            else
-            {
+            else {
                 Console.WriteLine($"{number}");
             }
         } catch (Exception e) {
@@ -169,8 +205,7 @@ class run
         }
     }
     
-    private static void AldersCheck()
-    {
+    private static void AldersCheck() {
         Console.WriteLine("Alders check!\nVenligst indtast din alder for at se om du er myndig til at stemme:\t");
         string input = Console.ReadLine();
         try {
@@ -195,26 +230,21 @@ class run
         }
     }
     
-    public static void GetNameSort()
-    {
+    public static void GetNameSort() {
         Console.WriteLine("Indtast et vilkårligt antal navne og programmet vil sortere det for dig i alfabetisk rækkefølge:\t");
         string input = Console.ReadLine();
-        try
-        {
+        try {
             string[] names = input.Split(' ');
-            if (names.Length < 5)
-            {
+            if (names.Length < 5) {
                 throw new Exception("Der er ikke nok navne i listen til at blive sorterert.");
             }
             Array.Sort(names);
-            foreach (string name in names)
-            {
+            foreach (string name in names) {
                 Console.WriteLine(name);
             }
 
         }
-        catch (Exception e)
-        {
+        catch (Exception e) {
             Console.WriteLine(e);
             throw;
         }

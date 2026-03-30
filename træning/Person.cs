@@ -1,12 +1,8 @@
 ﻿namespace træning;
 
-public class Person
-{
+public class Person {
     public string Name { get; set; }
     public int Age { get; set; }
-    
-
-  
     
     public virtual void Greet() {
         Console.WriteLine($"Hej {Name}, tillykke med dine {Age} år.");

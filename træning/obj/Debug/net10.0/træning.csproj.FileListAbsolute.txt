@@ -34,3 +34,9 @@ C:\Users\Bruger 1\RiderProjects\C_Sharp_training\træning\bin\Debug\net10.0\TCPD
 C:\Users\Bruger 1\RiderProjects\C_Sharp_training\træning\bin\Debug\net10.0\TCPExtensions.pdb
 C:\Users\Bruger 1\RiderProjects\C_Sharp_training\træning\obj\Debug\net10.0\træning.csproj.AssemblyReference.cache
 C:\Users\Bruger 1\RiderProjects\C_Sharp_training\træning\obj\Debug\net10.0\træning.csproj.Up2Date
+C:\Users\elias\RiderProjects\træning\træning\bin\Debug\net10.0\TCPData.dll
+C:\Users\elias\RiderProjects\træning\træning\bin\Debug\net10.0\TCPExtensions.dll
+C:\Users\elias\RiderProjects\træning\træning\bin\Debug\net10.0\TCPData.pdb
+C:\Users\elias\RiderProjects\træning\træning\bin\Debug\net10.0\TCPExtensions.pdb
+C:\Users\elias\RiderProjects\træning\træning\obj\Debug\net10.0\træning.csproj.AssemblyReference.cache
+C:\Users\elias\RiderProjects\træning\træning\obj\Debug\net10.0\træning.csproj.Up2Date

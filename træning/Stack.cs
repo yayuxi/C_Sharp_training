@@ -4,8 +4,7 @@ public class Stack<T>
 {
     private List<T> stackList;
     
-    public Stack()
-    {
+    public Stack() {
         stackList = new List<T>();
     }
 

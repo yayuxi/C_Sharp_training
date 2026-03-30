@@ -10,3 +10,15 @@ C:\Users\Bruger 1\RiderProjects\C_Sharp_training\TCPExtensions\obj\Debug\net10.0
 C:\Users\Bruger 1\RiderProjects\C_Sharp_training\TCPExtensions\obj\Debug\net10.0\refint\TCPExtensions.dll
 C:\Users\Bruger 1\RiderProjects\C_Sharp_training\TCPExtensions\obj\Debug\net10.0\TCPExtensions.pdb
 C:\Users\Bruger 1\RiderProjects\C_Sharp_training\TCPExtensions\obj\Debug\net10.0\ref\TCPExtensions.dll
+C:\Users\elias\RiderProjects\træning\TCPExtensions\bin\Debug\net10.0\TCPExtensions.deps.json
+C:\Users\elias\RiderProjects\træning\TCPExtensions\bin\Debug\net10.0\TCPExtensions.dll
+C:\Users\elias\RiderProjects\træning\TCPExtensions\bin\Debug\net10.0\TCPExtensions.pdb
+C:\Users\elias\RiderProjects\træning\TCPExtensions\obj\Debug\net10.0\TCPExtensions.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\elias\RiderProjects\træning\TCPExtensions\obj\Debug\net10.0\TCPExtensions.AssemblyInfoInputs.cache
+C:\Users\elias\RiderProjects\træning\TCPExtensions\obj\Debug\net10.0\TCPExtensions.AssemblyInfo.cs
+C:\Users\elias\RiderProjects\træning\TCPExtensions\obj\Debug\net10.0\TCPExtensions.csproj.CoreCompileInputs.cache
+C:\Users\elias\RiderProjects\træning\TCPExtensions\obj\Debug\net10.0\TCPExtensions.sourcelink.json
+C:\Users\elias\RiderProjects\træning\TCPExtensions\obj\Debug\net10.0\TCPExtensions.dll
+C:\Users\elias\RiderProjects\træning\TCPExtensions\obj\Debug\net10.0\refint\TCPExtensions.dll
+C:\Users\elias\RiderProjects\træning\TCPExtensions\obj\Debug\net10.0\TCPExtensions.pdb
+C:\Users\elias\RiderProjects\træning\TCPExtensions\obj\Debug\net10.0\ref\TCPExtensions.dll
