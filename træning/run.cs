@@ -1,8 +1,16 @@
 ﻿using System.Diagnostics;
+using System.Text;
+using System.Text.Json;
 
 namespace træning;
 using TCPData;
 using TCPExtensions;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using System.Linq;
 
 class run {
@@ -131,20 +139,21 @@ class run {
         Print print = new Print(button);
         button.ButtonClick();
      */
-    // private static void Main(string[] args) { }
-    static async Task Main(string[] args)
-    {
-        // Console.WriteLine("=== Sequential Download ===\n");
-        // var stopwatch = Stopwatch.StartNew();
-        //
-        // foreach (var url in Downloader.urls)
-        // {
-        //     string content = await Downloader.DownloadAsync(url);
-        //     Console.WriteLine($"Downloaded {url} — {content.Length} chars");
-        // }
-        //
-        // stopwatch.Stop();
-        // Console.WriteLine($"\nTotal time: {stopwatch.ElapsedMilliseconds}ms");
+    
+    /*
+     * Week 4
+     *
+     * Console.WriteLine("=== Sequential Download ===\n");
+        var stopwatch = Stopwatch.StartNew();
+        
+        foreach (var url in Downloader.urls)
+        {
+            string content = await Downloader.DownloadAsync(url);
+            Console.WriteLine($"Downloaded {url} — {content.Length} chars");
+        }
+        
+        stopwatch.Stop();
+        Console.WriteLine($"\nTotal time: {stopwatch.ElapsedMilliseconds}ms");
         
         Console.WriteLine("=== Parallel Download ===\n");
         var stopwatch = Stopwatch.StartNew();
@@ -159,13 +168,66 @@ class run {
         // Wait for ALL tasks to complete, then get results
         string[] results = await Task.WhenAll(downloadTasks);
         
-        for (int i = 0; i < Downloader.urls.Count; i++)
+        foreach (int i = 0; i < Downloader.urls.Count; i++)
         {
             Console.WriteLine($"Downloaded {Downloader.urls[i]} — {results[i].Length} chars");
         }
         
         stopwatch.Stop();
         Console.WriteLine($"\nTotal time: {stopwatch.ElapsedMilliseconds}ms");
+        
+     */
+    // private static void Main(string[] args) { }
+    static async Task Main(string[] args) {
+        List<TodoFetcher.Todo> Todo = new List<TodoFetcher.Todo>();
+        
+        const string todoUrl = "https://jsonplaceholder.typicode.com/todos";
+
+        // Fetch and deserialize
+        string json = await TodoFetcher.client.GetStringAsync(todoUrl);
+        List<TodoFetcher.Todo> todos = JsonSerializer.Deserialize<List<TodoFetcher.Todo>>(json);
+        
+        TodoFetcher.Todo newTodo = new TodoFetcher.Todo()
+        {
+            UserId = 11,
+            Id = 201,
+            Title = "Finish C# training",
+            Completed = false
+        };
+
+        // Serialize the object to JSON and set the correct content type
+        string jsonBody = JsonSerializer.Serialize(newTodo);
+        StringContent content = new StringContent(jsonBody, Encoding.UTF8, "application/json");
+
+        HttpResponseMessage response = await TodoFetcher.client.PostAsync(todoUrl, content);
+
+        Console.WriteLine($"Status: {response.StatusCode}");  // Should print "Created" (201)
+
+        string responseString = await response.Content.ReadAsStringAsync();
+        Console.WriteLine($"Response: {responseString}");
+
+        // LINQ: filter to incomplete todos
+        List<TodoFetcher.Todo> unfinished = todos
+            .Where(t => !t.Completed)
+            .OrderBy(t => t.UserId)
+            .ToList();
+
+        Console.WriteLine($"Total todos:      {todos.Count}");
+        Console.WriteLine($"Unfinished todos: {unfinished.Count}");
+        Console.WriteLine($"Finished todos:   {todos.Count - unfinished.Count}");
+        Console.WriteLine();
+
+        foreach (var todo in unfinished)
+        {
+            Console.WriteLine($"[User {todo.UserId}] #{todo.Id}: {todo.Title}");
+        }
+        
+        const string userUrl = "https://jsonplaceholder.typicode.com/users/3";
+
+        string userJson = await TodoFetcher.client.GetStringAsync(userUrl);
+        TodoFetcher.User user = JsonSerializer.Deserialize<TodoFetcher.User>(userJson);  // Single object, not a List
+
+        Console.WriteLine($"[User {user.Id}] name: {user.Name}, email: {user.Email}, city: {user.Address.City}");
     }
 
     public static void GetFizzBuzz() {
