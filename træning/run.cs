@@ -1,4 +1,6 @@
-﻿namespace træning;
+﻿using System.Diagnostics;
+
+namespace træning;
 using TCPData;
 using TCPExtensions;
 using System.Linq;
@@ -47,14 +49,12 @@ class run {
                     Console.WriteLine("Indtast emailen på kontakten:\t");
                     string email = Console.ReadLine();
                     contact.addContact(name, email);
-                    Console.WriteLine("Kontakten er tilføjet!");
                     Console.WriteLine(instructions);
                     break;
                 case "remove":
                     Console.WriteLine("Indtast navnet på kontakten du vil fjerne:\t");
                     string removeName = Console.ReadLine();
                     contact.removeContact(removeName);
-                    Console.WriteLine("Kontakten er fjernet!");
                     Console.WriteLine(instructions);
                     break;
                 case "search":
@@ -131,51 +131,42 @@ class run {
         Print print = new Print(button);
         button.ButtonClick();
      */
-    private static void Main(string[] args) {
-        Contact contact = new Contact("","");
-        string instructions =
-            "Indtast 'add' for at tilføje en kontakt, 'remove' for at fjerne en kontakt, 'search' for at søge efter en kontakt, 'list' for at se alle kontakter eller 'exit' for at afslutte programmet.";
-        Console.WriteLine("Velkommen til kontaktbogen! Her kan du tilføje, søge og se dine kontakter.");
-        Console.WriteLine(instructions);
-        while (true) {
-            string input = Console.ReadLine();
-            switch(input) {
-                case "add":
-                    Console.WriteLine("Indtast navnet på kontakten:\t");
-                    string name = Console.ReadLine();
-                    Console.WriteLine("Indtast emailen på kontakten:\t");
-                    string email = Console.ReadLine();
-                    contact.addContact(name, email);
-                    Console.WriteLine(instructions);
-                    break;
-                case "remove":
-                    Console.WriteLine("Indtast navnet på kontakten du vil fjerne:\t");
-                    string removeName = Console.ReadLine();
-                    contact.removeContact(removeName);
-                    Console.WriteLine(instructions);
-                    break;
-                case "search":
-                    Console.WriteLine("Indtast navnet på kontakten du vil søge efter:\t");
-                    string searchName = Console.ReadLine();
-                    contact.searchContact(searchName);
-                    Console.WriteLine(instructions);
-                    break;
-                case "list":
-                    contact.printList();
-                    Console.WriteLine(instructions);
-                    break;
-                case "exit":
-                    contact.exitProgram();
-                    break;
-                default:                         
-                    Console.WriteLine("Ugyldig kommando! Indtast 'add', 'search', 'list' eller 'exit'.");
-                    break;
-                
-            }
-            
+    // private static void Main(string[] args) { }
+    static async Task Main(string[] args)
+    {
+        // Console.WriteLine("=== Sequential Download ===\n");
+        // var stopwatch = Stopwatch.StartNew();
+        //
+        // foreach (var url in Downloader.urls)
+        // {
+        //     string content = await Downloader.DownloadAsync(url);
+        //     Console.WriteLine($"Downloaded {url} — {content.Length} chars");
+        // }
+        //
+        // stopwatch.Stop();
+        // Console.WriteLine($"\nTotal time: {stopwatch.ElapsedMilliseconds}ms");
+        
+        Console.WriteLine("=== Parallel Download ===\n");
+        var stopwatch = Stopwatch.StartNew();
+        
+        // Create all tasks immediately — downloads start right away
+        List<Task<string>> downloadTasks = new List<Task<string>>();
+        foreach (var url in Downloader.urls)
+        {
+            downloadTasks.Add(Downloader.DownloadAsync(url));
         }
+        
+        // Wait for ALL tasks to complete, then get results
+        string[] results = await Task.WhenAll(downloadTasks);
+        
+        for (int i = 0; i < Downloader.urls.Count; i++)
+        {
+            Console.WriteLine($"Downloaded {Downloader.urls[i]} — {results[i].Length} chars");
+        }
+        
+        stopwatch.Stop();
+        Console.WriteLine($"\nTotal time: {stopwatch.ElapsedMilliseconds}ms");
     }
-    
 
     public static void GetFizzBuzz() {
         Console.WriteLine("Det er tid til FIZZBUZZ!!! woo hoo\n Vælg et tal mellem 1 og 100 og se hvad resultatet bliver:\t");
