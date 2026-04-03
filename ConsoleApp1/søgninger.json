@@ -1,0 +1,60 @@
+[
+  {
+    "city": "Odense",
+    "country": "Denmark",
+    "searchedAt": "2026-04-03T16:52:32.632171+02:00",
+    "weeklyHighC": 11.2,
+    "weeklyLowC": 0.5,
+    "days": [
+      {
+        "date": "2026-04-03",
+        "condition": "Overcast",
+        "minTempC": 3.9,
+        "maxTempC": 10.3,
+        "precipitationChance": 21
+      },
+      {
+        "date": "2026-04-04",
+        "condition": "Overcast",
+        "minTempC": 5.2,
+        "maxTempC": 10.2,
+        "precipitationChance": 6
+      },
+      {
+        "date": "2026-04-05",
+        "condition": "Overcast",
+        "minTempC": 3.7,
+        "maxTempC": 10.5,
+        "precipitationChance": 15
+      },
+      {
+        "date": "2026-04-06",
+        "condition": "Clear sky",
+        "minTempC": 4.1,
+        "maxTempC": 10.2,
+        "precipitationChance": 4
+      },
+      {
+        "date": "2026-04-07",
+        "condition": "Clear sky",
+        "minTempC": 2.7,
+        "maxTempC": 11.2,
+        "precipitationChance": 0
+      },
+      {
+        "date": "2026-04-08",
+        "condition": "Clear sky",
+        "minTempC": 1,
+        "maxTempC": 9.6,
+        "precipitationChance": 0
+      },
+      {
+        "date": "2026-04-09",
+        "condition": "Partly cloudy",
+        "minTempC": 0.5,
+        "maxTempC": 6.8,
+        "precipitationChance": 3
+      }
+    ]
+  }
+]
