@@ -2,7 +2,7 @@
   {
     "city": "Odense",
     "country": "Denmark",
-    "searchedAt": "2026-04-03T16:52:32.632171+02:00",
+    "searchedAt": "2026-04-03T16:52:32.632171\u002B02:00",
     "weeklyHighC": 11.2,
     "weeklyLowC": 0.5,
     "days": [
@@ -54,6 +54,262 @@
         "minTempC": 0.5,
         "maxTempC": 6.8,
         "precipitationChance": 3
+      }
+    ]
+  },
+  {
+    "city": "Copenhagen",
+    "country": "Denmark",
+    "searchedAt": "2026-04-07T16:40:47.8472847\u002B02:00",
+    "weeklyHigh": {
+      "day": "Wednesday",
+      "tempC": 13.8
+    },
+    "weeklyLow": {
+      "day": "Thursday",
+      "tempC": 1.7
+    },
+    "days": [
+      {
+        "date": "2026-04-07",
+        "condition": "Clear sky",
+        "minTempC": 4.8,
+        "maxTempC": 12.1,
+        "precipitationChance": 0
+      },
+      {
+        "date": "2026-04-08",
+        "condition": "Clear sky",
+        "minTempC": 5.3,
+        "maxTempC": 13.8,
+        "precipitationChance": 0
+      },
+      {
+        "date": "2026-04-09",
+        "condition": "Overcast",
+        "minTempC": 1.7,
+        "maxTempC": 10,
+        "precipitationChance": 0
+      },
+      {
+        "date": "2026-04-10",
+        "condition": "Clear sky",
+        "minTempC": 1.9,
+        "maxTempC": 6.8,
+        "precipitationChance": 12
+      },
+      {
+        "date": "2026-04-11",
+        "condition": "Clear sky",
+        "minTempC": 2.1,
+        "maxTempC": 8.8,
+        "precipitationChance": 0
+      },
+      {
+        "date": "2026-04-12",
+        "condition": "Overcast",
+        "minTempC": 3.8,
+        "maxTempC": 9.2,
+        "precipitationChance": 3
+      },
+      {
+        "date": "2026-04-13",
+        "condition": "Overcast",
+        "minTempC": 5.7,
+        "maxTempC": 9.1,
+        "precipitationChance": 9
+      }
+    ]
+  },
+  {
+    "city": "Beijing",
+    "country": "China",
+    "searchedAt": "2026-04-07T16:41:57.1465201\u002B02:00",
+    "weeklyHigh": {
+      "day": "Saturday",
+      "tempC": 26.3
+    },
+    "weeklyLow": {
+      "day": "Tuesday",
+      "tempC": 5.2
+    },
+    "days": [
+      {
+        "date": "2026-04-07",
+        "condition": "Clear sky",
+        "minTempC": 5.2,
+        "maxTempC": 14.7,
+        "precipitationChance": 0
+      },
+      {
+        "date": "2026-04-08",
+        "condition": "Rain",
+        "minTempC": 6.8,
+        "maxTempC": 19.1,
+        "precipitationChance": 32
+      },
+      {
+        "date": "2026-04-09",
+        "condition": "Overcast",
+        "minTempC": 8,
+        "maxTempC": 11.5,
+        "precipitationChance": 21
+      },
+      {
+        "date": "2026-04-10",
+        "condition": "Clear sky",
+        "minTempC": 10.3,
+        "maxTempC": 23.7,
+        "precipitationChance": 0
+      },
+      {
+        "date": "2026-04-11",
+        "condition": "Clear sky",
+        "minTempC": 13.2,
+        "maxTempC": 26.3,
+        "precipitationChance": 0
+      },
+      {
+        "date": "2026-04-12",
+        "condition": "Clear sky",
+        "minTempC": 11.2,
+        "maxTempC": 23.8,
+        "precipitationChance": 0
+      },
+      {
+        "date": "2026-04-13",
+        "condition": "Clear sky",
+        "minTempC": 9.4,
+        "maxTempC": 19.4,
+        "precipitationChance": 0
+      }
+    ]
+  },
+  {
+    "city": "Hej",
+    "country": "India",
+    "searchedAt": "2026-04-07T16:45:17.8767096\u002B02:00",
+    "weeklyHigh": {
+      "day": "Monday",
+      "tempC": 17.5
+    },
+    "weeklyLow": {
+      "day": "Thursday",
+      "tempC": 4
+    },
+    "days": [
+      {
+        "date": "2026-04-07",
+        "condition": "Overcast",
+        "minTempC": 5.5,
+        "maxTempC": 14.1,
+        "precipitationChance": 51
+      },
+      {
+        "date": "2026-04-08",
+        "condition": "Rain showers",
+        "minTempC": 4.1,
+        "maxTempC": 8.9,
+        "precipitationChance": 42
+      },
+      {
+        "date": "2026-04-09",
+        "condition": "Clear sky",
+        "minTempC": 4,
+        "maxTempC": 9,
+        "precipitationChance": 7
+      },
+      {
+        "date": "2026-04-10",
+        "condition": "Clear sky",
+        "minTempC": 4.8,
+        "maxTempC": 13.3,
+        "precipitationChance": 0
+      },
+      {
+        "date": "2026-04-11",
+        "condition": "Clear sky",
+        "minTempC": 7.1,
+        "maxTempC": 15,
+        "precipitationChance": 1
+      },
+      {
+        "date": "2026-04-12",
+        "condition": "Clear sky",
+        "minTempC": 7.3,
+        "maxTempC": 16.1,
+        "precipitationChance": 0
+      },
+      {
+        "date": "2026-04-13",
+        "condition": "Clear sky",
+        "minTempC": 8.1,
+        "maxTempC": 17.5,
+        "precipitationChance": 0
+      }
+    ]
+  },
+  {
+    "city": "Olean",
+    "country": "United States",
+    "searchedAt": "2026-04-07T16:45:25.2807761+02:00",
+    "weeklyHigh": {
+      "day": "Sunday",
+      "tempC": 19.6
+    },
+    "weeklyLow": {
+      "day": "Wednesday",
+      "tempC": -4.3
+    },
+    "days": [
+      {
+        "date": "2026-04-07",
+        "condition": "Overcast",
+        "minTempC": -3.6,
+        "maxTempC": 3,
+        "precipitationChance": 7
+      },
+      {
+        "date": "2026-04-08",
+        "condition": "Clear sky",
+        "minTempC": -4.3,
+        "maxTempC": 10.9,
+        "precipitationChance": 0
+      },
+      {
+        "date": "2026-04-09",
+        "condition": "Clear sky",
+        "minTempC": -0.5,
+        "maxTempC": 17,
+        "precipitationChance": 2
+      },
+      {
+        "date": "2026-04-10",
+        "condition": "Drizzle",
+        "minTempC": 8.6,
+        "maxTempC": 16.4,
+        "precipitationChance": 23
+      },
+      {
+        "date": "2026-04-11",
+        "condition": "Overcast",
+        "minTempC": 1.1,
+        "maxTempC": 10.9,
+        "precipitationChance": 14
+      },
+      {
+        "date": "2026-04-12",
+        "condition": "Clear sky",
+        "minTempC": 0.4,
+        "maxTempC": 19.6,
+        "precipitationChance": 3
+      },
+      {
+        "date": "2026-04-13",
+        "condition": "Overcast",
+        "minTempC": 11.3,
+        "maxTempC": 16,
+        "precipitationChance": 14
       }
     ]
   }

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("TCPExtensions")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+757259085cb5056fa5c9ba608340ddcccfe72a8c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7e7213b51ce1db7b490a94ab535125da6e514cb0")]
 [assembly: System.Reflection.AssemblyProductAttribute("TCPExtensions")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TCPExtensions")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
