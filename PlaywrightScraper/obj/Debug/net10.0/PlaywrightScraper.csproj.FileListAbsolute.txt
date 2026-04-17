@@ -487,3 +487,4 @@ C:\Users\elias\RiderProjects\træning\PlaywrightScraper\obj\Debug\net10.0\refint
 C:\Users\elias\RiderProjects\træning\PlaywrightScraper\obj\Debug\net10.0\PlaywrightScraper.pdb
 C:\Users\elias\RiderProjects\træning\PlaywrightScraper\obj\Debug\net10.0\PlaywrightScraper.genruntimeconfig.cache
 C:\Users\elias\RiderProjects\træning\PlaywrightScraper\obj\Debug\net10.0\ref\PlaywrightScraper.dll
+C:\Users\elias\RiderProjects\træning\PlaywrightScraper\bin\Debug\net10.0\CsvHelper.dll
