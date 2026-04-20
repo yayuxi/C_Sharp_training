@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "Z8vUOfCzQY8=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\elias\\RiderProjects\\træning\\BooksScraper\\BooksScraper.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\elias\\.nuget\\packages\\csvhelper\\33.1.0\\csvhelper.33.1.0.nupkg.sha512",
+    "C:\\Users\\elias\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\6.0.0\\microsoft.bcl.asyncinterfaces.6.0.0.nupkg.sha512",
+    "C:\\Users\\elias\\.nuget\\packages\\microsoft.playwright\\1.59.0\\microsoft.playwright.1.59.0.nupkg.sha512",
+    "C:\\Users\\elias\\.nuget\\packages\\system.componentmodel.annotations\\5.0.0\\system.componentmodel.annotations.5.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}

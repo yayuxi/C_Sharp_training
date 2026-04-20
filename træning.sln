@@ -10,6 +10,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlaywrightScraper", "PlaywrightScraper\PlaywrightScraper.csproj", "{2241D518-A5B6-498E-8B35-A28236FB0ABC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BooksScraper", "BooksScraper\BooksScraper.csproj", "{9702915B-A194-4CFE-AE62-5CD4954075CB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +38,9 @@ Global
 		{2241D518-A5B6-498E-8B35-A28236FB0ABC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2241D518-A5B6-498E-8B35-A28236FB0ABC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2241D518-A5B6-498E-8B35-A28236FB0ABC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9702915B-A194-4CFE-AE62-5CD4954075CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9702915B-A194-4CFE-AE62-5CD4954075CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9702915B-A194-4CFE-AE62-5CD4954075CB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9702915B-A194-4CFE-AE62-5CD4954075CB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
