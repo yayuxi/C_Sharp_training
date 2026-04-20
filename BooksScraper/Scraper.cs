@@ -6,6 +6,7 @@ namespace BooksScraper;
 public class Scraper
 {
     private readonly IPage _page;
+    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(10);
     private const int MaxRetries = 3;
     private const int RetryDelayMs = 3000;
 
@@ -22,25 +23,30 @@ public class Scraper
         while (true)
         {
             var bookElements = await _page.QuerySelectorAllAsync(".product_pod");
-            int successCount = 0;
-            int failCount = 0;
 
-            foreach (var bookElement in bookElements)
+            // Project each element into a task and run them all concurrently
+            var tasks = bookElements.Select(async bookElement =>
             {
                 try
                 {
-                    var book = await ScrapeBookAsync(bookElement);
-                    books.Add(book);
-                    successCount++;
+                    return await ScrapeBookAsync(bookElement);
                 }
                 catch (ScraperException ex)
                 {
                     Console.WriteLine($"[Warning] Skipping book on page {pageNumber} — {ex.Message}");
-                    failCount++;
+                    return null;
                 }
-            }
+            });
 
-            Console.WriteLine($"[Page {pageNumber}] Scraped {successCount} books" +
+            // Wait for all 20 book tasks on this page to finish
+            var results = await Task.WhenAll(tasks);
+
+            // Filter out any nulls from skipped books
+            var pageBooks = results.Where(b => b != null).ToList();
+            books.AddRange(pageBooks);
+
+            int failCount = results.Count(b => b == null);
+            Console.WriteLine($"[Page {pageNumber}] Scraped {pageBooks.Count} books" +
                               (failCount > 0 ? $", skipped {failCount}" : "") +
                               $" — Total so far: {books.Count}");
 
@@ -94,22 +100,20 @@ public class Scraper
 
     private async Task<string> ScrapeBookCategoryAsync(string bookUrl)
     {
-        // Open detail page in a new page to avoid losing our place
+        await _semaphore.WaitAsync(); // wait for a free slot
         var detailPage = await _page.Context.NewPageAsync();
         try
         {
             await NavigateWithRetryAsync(bookUrl, detailPage);
-
-            // Category is the second-to-last breadcrumb: Home > Category > Book
             var breadcrumbs = await detailPage.QuerySelectorAllAsync(".breadcrumb li");
             if (breadcrumbs.Count < 3)
                 throw new ElementNotFoundException("category breadcrumb");
-
             return (await breadcrumbs[^2].InnerTextAsync()).Trim();
         }
         finally
         {
             await detailPage.CloseAsync();
+            _semaphore.Release(); // always release the slot, even if an exception occurred
         }
     }
 
@@ -124,7 +128,7 @@ public class Scraper
                 await pg.GotoAsync(url, new PageGotoOptions
                 {
                     WaitUntil = WaitUntilState.NetworkIdle, // Changed from DOMContentLoaded
-                    Timeout = 15000
+                    Timeout = 3000
                 });
                 return; // If GotoAsync succeeds with NetworkIdle, page is fully ready
             }
