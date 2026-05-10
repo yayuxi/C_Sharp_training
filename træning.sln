@@ -14,6 +14,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BooksScraper", "BooksScrape
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICHScraper", "ICHScraper\ICHScraper.csproj", "{79F457A3-1E67-452C-A47F-C6962A2B2909}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScraberTemplate", "ScraberTemplate\ScraberTemplate.csproj", "{AC4E99A6-F6F8-4018-BF0B-0A47B5A13A91}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -48,5 +50,9 @@ Global
 		{79F457A3-1E67-452C-A47F-C6962A2B2909}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79F457A3-1E67-452C-A47F-C6962A2B2909}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79F457A3-1E67-452C-A47F-C6962A2B2909}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AC4E99A6-F6F8-4018-BF0B-0A47B5A13A91}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AC4E99A6-F6F8-4018-BF0B-0A47B5A13A91}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AC4E99A6-F6F8-4018-BF0B-0A47B5A13A91}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AC4E99A6-F6F8-4018-BF0B-0A47B5A13A91}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
