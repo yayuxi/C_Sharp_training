@@ -1,13 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "TgKboNGt+AA=",
+  "dgSpecHash": "Diy/il9txhE=",
   "success": true,
-  "projectFilePath": "C:\\Users\\elias\\RiderProjects\\træning\\ScraberTemplate\\ScraberTemplate.csproj",
+  "projectFilePath": "C:\\Users\\Bruger 1\\RiderProjects\\C_Sharp_training\\ScraberTemplate\\ScraberTemplate.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\elias\\.nuget\\packages\\csvhelper\\33.1.0\\csvhelper.33.1.0.nupkg.sha512",
-    "C:\\Users\\elias\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\6.0.0\\microsoft.bcl.asyncinterfaces.6.0.0.nupkg.sha512",
-    "C:\\Users\\elias\\.nuget\\packages\\microsoft.playwright\\1.59.0\\microsoft.playwright.1.59.0.nupkg.sha512",
-    "C:\\Users\\elias\\.nuget\\packages\\system.componentmodel.annotations\\5.0.0\\system.componentmodel.annotations.5.0.0.nupkg.sha512"
+    "C:\\Users\\Bruger 1\\.nuget\\packages\\csvhelper\\33.1.0\\csvhelper.33.1.0.nupkg.sha512",
+    "C:\\Users\\Bruger 1\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\6.0.0\\microsoft.bcl.asyncinterfaces.6.0.0.nupkg.sha512",
+    "C:\\Users\\Bruger 1\\.nuget\\packages\\microsoft.playwright\\1.59.0\\microsoft.playwright.1.59.0.nupkg.sha512",
+    "C:\\Users\\Bruger 1\\.nuget\\packages\\system.componentmodel.annotations\\5.0.0\\system.componentmodel.annotations.5.0.0.nupkg.sha512"
   ],
   "logs": []
 }
