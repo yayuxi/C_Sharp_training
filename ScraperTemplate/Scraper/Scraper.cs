@@ -266,22 +266,27 @@ public class Scraper
 
     public async Task<List<Guideline>> ScrapeGuidelines()
     {
-        await RetryHelper.ExecuteAsync(
-            () => _page.WaitForSelectorAsync(".product_pod"),
-            "Waiting for product elements to load");
+        // await RetryHelper.ExecuteAsync(
+        //     () => _page.WaitForSelectorAsync(".product_pod"),
+        //     "Waiting for product elements to load");
 
-        var elements = await _page.QuerySelectorAllAsync(".product_pod h3 a");
+        var elements = await _page.QuerySelectorAllAsync(".quote");
         var guidelines = new List<Guideline>();
 
         foreach (var element in elements)
         {
             var title = await element.InnerTextAsync();
             var url = await element.GetAttributeAsync("href");
+            var tags = await element.QuerySelectorAllAsync(".tag");
+            var tagsList = new List<string>();
+            foreach (var tag in tags)                                   
+                tagsList.Add(await tag.InnerTextAsync());
+            
             guidelines.Add(new Guideline
             {
                 GuidelineCode = Guid.NewGuid().ToString(),
                 Title = title.Trim(),
-                Category = "Template Category",
+                Category = string.Join("|", tagsList),
                 Step = "1",
                 Status = "Active",
                 Dated = DateTime.Now,
@@ -295,11 +300,11 @@ public class Scraper
 
     public async Task<List<GuidelineDocument>> ScrapeGuidelineDocuments()
     {
-        await RetryHelper.ExecuteAsync(
-            () => _page.WaitForSelectorAsync(".product_pod img"),
-            "Waiting for image elements to load");
+        // await RetryHelper.ExecuteAsync(
+        //     () => _page.WaitForSelectorAsync(".product_pod img"),
+        //     "Waiting for image elements to load");
 
-        var elements = await _page.QuerySelectorAllAsync(".product_pod img");
+        var elements = await _page.QuerySelectorAllAsync(".quote");
         var documents = new List<GuidelineDocument>();
 
         foreach (var element in elements)
@@ -310,7 +315,7 @@ public class Scraper
             {
                 GuidelineCode = Guid.NewGuid().ToString(),
                 DocumentTitle = title ?? "Untitled",
-                DocumentUrl = (url != null && url.StartsWith("http")) ? url : $"https://books.toscrape.com{url}",
+                DocumentUrl = (url != null && url.StartsWith("http")) ? url : $"https://quotes.toscrape.com/{url}",
                 DocumentType = "Image",
                 FileFormat = "jpg"
             });
