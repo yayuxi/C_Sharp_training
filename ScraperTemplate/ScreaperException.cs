@@ -21,3 +21,8 @@ public class ElementNotFoundException : ScraperException
     public ElementNotFoundException(string selector)
         : base($"Required element not found: {selector}") { }
 }
+
+public class BlockedException : ScraperException
+{
+    public BlockedException(string message) : base(message) { }
+}
