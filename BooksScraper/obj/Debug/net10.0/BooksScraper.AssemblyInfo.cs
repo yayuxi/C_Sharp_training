@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("BooksScraper")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9f70b48de5060713b1ec7146fbba2ca6759765db")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+871b2b763d5294be21b219b5ef47d5e0c47d7bfe")]
 [assembly: System.Reflection.AssemblyProductAttribute("BooksScraper")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BooksScraper")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
