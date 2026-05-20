@@ -1,8 +1,8 @@
-﻿using System.Text.Json;
+﻿
 using Microsoft.Playwright;
 using ScraperTemplate.Helpers;
 using ScraperTemplate.Models;
-using System.Text.RegularExpressions;
+using System.Text.Json;
 
 namespace ScraperTemplate.Scraper;
 
@@ -10,258 +10,316 @@ public class Scraper
 {
     private readonly IPage _page;
     private readonly string _sessionFile = "session.json";
+    private static readonly Random _random = new Random();
 
     public Scraper(IPage page)
     {
         _page = page;
     }
 
+    // -------------------------------------------------------------------------
+    // Login
+    // -------------------------------------------------------------------------
+
     /// <summary>
     /// Attempts to log in to the current page using the provided credentials.
-    /// Tries semantic locators first, then falls back to common CSS selectors.
-    /// Handles both single-step and multi-step login forms automatically.
+    /// Restores a saved session if available, otherwise performs a fresh login.
     /// Call this after GotoAsync() on the login page.
     /// </summary>
-    /// <param name="username">Email or username to log in with</param>
-    /// <param name="password">Password to log in with</param>
     public async Task LoginAsync(string username, string password)
     {
-        // If a saved session exists, restore it instead of logging in again
-        if (File.Exists(_sessionFile))
-        {
-            Console.WriteLine("[Login] Restoring saved session...");
-            await _page.Context.AddCookiesAsync(
-                JsonSerializer.Deserialize<List<Cookie>>(
-                    await File.ReadAllTextAsync(_sessionFile)) ?? []);
-
-            await _page.ReloadAsync();
-
-            if (await IsLoggedInAsync())
-            {
-                Console.WriteLine("[Login] Session restored successfully");
-                return;
-            }
-
-            Console.WriteLine("[Login] Saved session expired, logging in fresh...");
-            File.Delete(_sessionFile);
-        }
+        if (await TryRestoreSessionAsync()) return;
 
         await RetryHelper.ExecuteAsync(async () =>
         {
-            // Fill username/email field
-            await FillFieldAsync(
-                semanticPatterns: ["email", "username", "user", "login"],
-                cssSelectors: [
-                    "input[type='email']",
-                    "input[name='email']",
-                    "input[name='username']",
-                    "input[name='user']",
-                    "input[name='login']",
-                    "input[id*='email']",
-                    "input[id*='user']",
-                    "input[autocomplete='email']",
-                    "input[autocomplete='username']",
-                    "input[placeholder*='email' i]",
-                    "input[placeholder*='username' i]"
-                ],
-                value: username,
-                fieldName: "username/email");
+            var formType = await DetectFormTypeAsync();
+            Console.WriteLine($"[Login] Form type detected: {formType}");
 
-            // Check if this is a multi-step form (password field not yet visible)
-            var isMultiStep = await IsMultiStepFormAsync();
-            if (isMultiStep)
+            switch (formType)
             {
-                Console.WriteLine("[Login] Multi-step form detected, submitting username first...");
-                await ClickSubmitAsync();
-
-                // Wait for the password field to appear on the next step
-                await _page.WaitForSelectorAsync("input[type='password']",
-                    new PageWaitForSelectorOptions { Timeout = 10000 });
-                await HumanBehavior.PauseAsync(500, 1000);
+                case FormType.SingleStep:
+                    await HandleSingleStepAsync(username, password);
+                    break;
+                case FormType.MultiStep:
+                    await HandleMultiStepAsync(username, password);
+                    break;
+                case FormType.Unknown:
+                    throw new ScraperException("[Login] Could not detect login form structure");
             }
 
-            // Fill password field — type='password' is universal
-            await FillFieldAsync(
-                semanticPatterns: ["password", "pass"],
-                cssSelectors: [
-                    "input[type='password']",
-                    "input[name='password']",
-                    "input[name='pass']",
-                    "input[id*='pass']"
-                ],
-                value: password,
-                fieldName: "password");
-
-            await HumanBehavior.PauseAsync(300, 700);
-            await ClickSubmitAsync();
-
-            // Wait for navigation after login
             await _page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+            await TakeScreenshotAsync("04_after_login");
 
-            // Check if login succeeded
             if (!await IsLoggedInAsync())
                 throw new ScraperException("[Login] Login failed — still on login page or credentials rejected");
 
         }, "[Login] Attempting login");
 
-        // Save session cookies for future runs
         await SaveSessionAsync();
         Console.WriteLine("[Login] Login successful, session saved");
     }
 
-    /// <summary>
-    /// Fills an input field using semantic locators first, then CSS selector fallbacks.
-    /// </summary>
-    private async Task FillFieldAsync(
-    string[] semanticPatterns,
-    string[] cssSelectors,
-    string value,
-    string fieldName)
-{
-    // For password fields, always use type='password' directly — it's universal
-    // This prevents accidentally filling the password into a text field
-    if (fieldName == "password")
+    // -------------------------------------------------------------------------
+    // Form type detection
+    // -------------------------------------------------------------------------
+
+    private async Task<FormType> DetectFormTypeAsync()
     {
-        var passwordInput = await _page.QuerySelectorAsync("input[type='password']");
-        if (passwordInput != null)
-        {
-            await passwordInput.FillAsync(value);
-            Console.WriteLine($"[Login] Filled {fieldName} via type='password'");
-            return;
-        }
+        var usernameVisible = await IsUsernameFieldVisibleAsync();
+        var passwordVisible = await IsPasswordFieldVisibleAsync();
+
+        if (usernameVisible && passwordVisible) return FormType.SingleStep;
+        if (usernameVisible && !passwordVisible) return FormType.MultiStep;
+        return FormType.Unknown;
     }
 
-    // For username/email, explicitly exclude password fields from all selector matches
-    // Layer 1: semantic label matching
-    foreach (var pattern in semanticPatterns)
+    private async Task<bool> IsUsernameFieldVisibleAsync()
     {
-        try
+        var selectors = new[]
         {
-            var locator = _page.GetByLabel(new Regex(pattern, RegexOptions.IgnoreCase));
-            if (await locator.CountAsync() > 0)
-            {
-                // Make sure we didn't accidentally match a password field
-                var inputType = await locator.First.GetAttributeAsync("type") ?? "";
-                if (inputType == "password") continue;
+            "input[type='email']",
+            "input[autocomplete='username']",
+            "input[autocomplete='email']",
+            "input[name*='user' i]",
+            "input[name*='email' i]",
+            "input[id*='user' i]",
+            "input[id*='email' i]",
+            "input[placeholder*='email' i]",
+            "input[placeholder*='username' i]",
+            "input[type='text']:not([type='password'])"
+        };
 
-                await locator.First.FillAsync(value);
-                Console.WriteLine($"[Login] Filled {fieldName} via label '{pattern}'");
-                return;
-            }
+        foreach (var selector in selectors)
+        {
+            var element = await _page.QuerySelectorAsync(selector);
+            if (element != null && await element.IsVisibleAsync()) return true;
         }
-        catch { /* try next */ }
+
+        return false;
     }
 
-    // Layer 2: CSS selector fallbacks — also exclude password type
-    foreach (var selector in cssSelectors)
+    private async Task<bool> IsPasswordFieldVisibleAsync()
     {
-        try
+        var element = await _page.QuerySelectorAsync("input[type='password']");
+        return element != null && await element.IsVisibleAsync();
+    }
+
+    // -------------------------------------------------------------------------
+    // Form handlers
+    // -------------------------------------------------------------------------
+
+    private async Task HandleSingleStepAsync(string username, string password)
+    {
+        Console.WriteLine("[Login] Handling single-step form");
+        await FillUsernameAsync(username);
+        await TakeScreenshotAsync("02_username_filled");
+        await FillPasswordAsync(password);
+        await TakeScreenshotAsync("03_password_filled");
+        await ClickSubmitAsync();
+    }
+
+    private async Task HandleMultiStepAsync(string username, string password)
+    {
+        Console.WriteLine("[Login] Handling multi-step form — step 1: username");
+        await FillUsernameAsync(username);
+        await TakeScreenshotAsync("02_username_filled");
+        await ClickSubmitAsync();
+
+        Console.WriteLine("[Login] Waiting for password field...");
+        await _page.WaitForSelectorAsync("input[type='password']",
+            new PageWaitForSelectorOptions { Timeout = 10000 });
+        await PauseAsync(600, 1200);
+        await TakeScreenshotAsync("03_password_step");
+
+        Console.WriteLine("[Login] Step 2: password");
+        await FillPasswordAsync(password);
+        await TakeScreenshotAsync("03b_password_filled");
+        await ClickSubmitAsync();
+    }
+
+    // -------------------------------------------------------------------------
+    // Field filling
+    // -------------------------------------------------------------------------
+
+    private async Task FillUsernameAsync(string username)
+    {
+        var selectors = new[]
+        {
+            "input[type='email']",
+            "input[autocomplete='username']",
+            "input[autocomplete='email']",
+            "input[name='email']",
+            "input[name='username']",
+            "input[name='user']",
+            "input[name='login']",
+            "input[id*='email' i]",
+            "input[id*='user' i]",
+            "input[placeholder*='email' i]",
+            "input[placeholder*='username' i]",
+            "input[type='text']:not([type='password'])"
+        };
+
+        await FillFirstVisibleAsync(selectors, username, "username", excludePassword: true);
+    }
+
+    private async Task FillPasswordAsync(string password)
+    {
+        var element = await _page.QuerySelectorAsync("input[type='password']")
+            ?? throw new ScraperException("[Login] Password field not found");
+
+        await element.FillAsync(password);
+        Console.WriteLine("[Login] Filled password via type='password'");
+    }
+
+    private async Task FillFirstVisibleAsync(
+        string[] selectors,
+        string value,
+        string fieldName,
+        bool excludePassword = false)
+    {
+        foreach (var selector in selectors)
         {
             var element = await _page.QuerySelectorAsync(selector);
             if (element == null) continue;
+            if (!await element.IsVisibleAsync()) continue;
 
-            var inputType = await element.GetAttributeAsync("type") ?? "";
-            if (inputType == "password") continue;
+            if (excludePassword)
+            {
+                var type = await element.GetAttributeAsync("type") ?? "";
+                if (type == "password") continue;
+            }
 
             await element.FillAsync(value);
-            Console.WriteLine($"[Login] Filled {fieldName} via selector '{selector}'");
+            Console.WriteLine($"[Login] Filled {fieldName} via '{selector}'");
             return;
         }
-        catch { /* try next */ }
+
+        throw new ScraperException($"[Login] Could not find {fieldName} field on page");
     }
 
-    throw new ScraperException($"[Login] Could not find {fieldName} field on page");
-}
+    // -------------------------------------------------------------------------
+    // Submit
+    // -------------------------------------------------------------------------
 
-    /// <summary>
-    /// Clicks the submit/next button on a login form.
-    /// </summary>
     private async Task ClickSubmitAsync()
     {
-        var buttonPatterns = new[] { "sign in", "log in", "login", "next", "continue", "submit" };
+        var buttonPatterns = new[]
+            { "sign in", "log in", "login", "next", "continue", "submit" };
 
-        var buttons = await _page.QuerySelectorAllAsync("button, input[type='submit']");
-        foreach (var button in buttons)
+        var candidates = await _page.QuerySelectorAllAsync("button, input[type='submit']");
+
+        // Try to match by visible text first
+        foreach (var candidate in candidates)
         {
-            var text = (await button.InnerTextAsync()).Trim().ToLower();
-            if (buttonPatterns.Any(p => text.Contains(p)))
-            {
-                // Screenshot before clicking so you can inspect the state of the page
-                await _page.ScreenshotAsync(new PageScreenshotOptions
-                {
-                    Path = $"login_before_submit_{DateTime.Now:HHmmss}.png",
-                    FullPage = true
-                });
-                Console.WriteLine("[Login] Screenshot taken before submit click");
+            if (!await candidate.IsVisibleAsync()) continue;
 
-                await button.ClickAsync();
+            var text = (await candidate.InnerTextAsync()).Trim().ToLower();
+            var value = (await candidate.GetAttributeAsync("value") ?? "").ToLower();
+
+            if (buttonPatterns.Any(p => text.Contains(p) || value.Contains(p)))
+            {
+                Console.WriteLine($"[Login] Clicking submit: '{text}'");
+                await candidate.ClickAsync();
                 return;
             }
         }
 
-        var submitInput = await _page.QuerySelectorAsync("input[type='submit']");
-        if (submitInput != null)
+        // Fallback: first visible submit button regardless of text
+        foreach (var candidate in candidates)
         {
-            await _page.ScreenshotAsync(new PageScreenshotOptions
+            if (await candidate.IsVisibleAsync())
             {
-                Path = $"login_before_submit_{DateTime.Now:HHmmss}.png",
-                FullPage = true
-            });
-            Console.WriteLine("[Login] Screenshot taken before submit click");
-
-            await submitInput.ClickAsync();
-            return;
+                Console.WriteLine("[Login] Clicking first visible button");
+                await candidate.ClickAsync();
+                return;
+            }
         }
 
         Console.WriteLine("[Login] No submit button found, pressing Enter");
         await _page.Keyboard.PressAsync("Enter");
     }
 
-    /// <summary>
-    /// Detects whether the login form hides the password field until username is submitted.
-    /// </summary>
-    private async Task<bool> IsMultiStepFormAsync()
-    {
-        var passwordField = await _page.QuerySelectorAsync("input[type='password']");
-        if (passwordField == null) return true; // not present at all — definitely multi-step
+    // -------------------------------------------------------------------------
+    // Session persistence
+    // -------------------------------------------------------------------------
 
-        // Present but hidden via CSS
-        var isVisible = await passwordField.IsVisibleAsync();
-        return !isVisible;
+    private async Task<bool> TryRestoreSessionAsync()
+    {
+        if (!File.Exists(_sessionFile)) return false;
+
+        Console.WriteLine("[Login] Restoring saved session...");
+        try
+        {
+            var cookies = JsonSerializer.Deserialize<List<Cookie>>(
+                await File.ReadAllTextAsync(_sessionFile));
+
+            if (cookies != null)
+                await _page.Context.AddCookiesAsync(cookies);
+
+            await _page.ReloadAsync(new PageReloadOptions
+                { WaitUntil = WaitUntilState.NetworkIdle });
+
+            if (await IsLoggedInAsync())
+            {
+                Console.WriteLine("[Login] Session restored successfully");
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Login] Session restore failed — {ex.Message}");
+        }
+
+        Console.WriteLine("[Login] Saved session expired, logging in fresh...");
+        File.Delete(_sessionFile);
+        return false;
     }
 
+    private async Task SaveSessionAsync()
+    {
+        var cookies = await _page.Context.CookiesAsync();
+        await File.WriteAllTextAsync(_sessionFile,
+            JsonSerializer.Serialize(cookies,
+                new JsonSerializerOptions { WriteIndented = true }));
+    }
+
+    // -------------------------------------------------------------------------
+    // Verification and utilities
+    // -------------------------------------------------------------------------
+
     /// <summary>
-    /// Override this method to define what "logged in" looks like on the target site.
+    /// Override this in a subclass to check for a site-specific post-login element.
     /// Default checks that the URL no longer contains login-related keywords.
     /// </summary>
     protected virtual async Task<bool> IsLoggedInAsync()
     {
         var url = _page.Url.ToLower();
-        var isOnLoginPage = url.Contains("login") ||
-                            url.Contains("signin") ||
-                            url.Contains("sign-in") ||
-                            url.Contains("auth");
+        var isOnLoginPage = new[] { "login", "signin", "sign-in", "auth" }
+            .Any(url.Contains);
 
-        // Also check for common post-login indicators in the DOM
-        var dashboardIndicator = await _page.QuerySelectorAsync(
+        var postLoginElement = await _page.QuerySelectorAsync(
             "[class*='dashboard'], [class*='profile'], [class*='account'], " +
             "[href*='logout'], [href*='sign-out']");
 
-        return !isOnLoginPage || dashboardIndicator != null;
+        return !isOnLoginPage || postLoginElement != null;
     }
 
-    /// <summary>
-    /// Saves current browser cookies to disk for session reuse.
-    /// </summary>
-    private async Task SaveSessionAsync()
+    private async Task TakeScreenshotAsync(string label)
     {
-        var cookies = await _page.Context.CookiesAsync();
-        await File.WriteAllTextAsync(_sessionFile,
-            JsonSerializer.Serialize(cookies, new JsonSerializerOptions { WriteIndented = true }));
+        var path = $"screenshot_{label}_{DateTime.Now:HHmmss}.png";
+        await _page.ScreenshotAsync(new PageScreenshotOptions
+        {
+            Path = path,
+            FullPage = true
+        });
+        Console.WriteLine($"[Screenshot] {path}");
     }
+
+    private static async Task PauseAsync(int minMs, int maxMs)
+        => await Task.Delay(_random.Next(minMs, maxMs));
 
     // -------------------------------------------------------------------------
-    // Existing scraping methods below — unchanged
+    // Scraping — replace with site-specific logic
     // -------------------------------------------------------------------------
 
     public async Task<List<Guideline>> ScrapeGuidelines()
@@ -281,7 +339,6 @@ public class Scraper
             var tagsList = new List<string>();
             foreach (var tag in tags)                                   
                 tagsList.Add(await tag.InnerTextAsync());
-            
             guidelines.Add(new Guideline
             {
                 GuidelineCode = Guid.NewGuid().ToString(),
@@ -315,7 +372,9 @@ public class Scraper
             {
                 GuidelineCode = Guid.NewGuid().ToString(),
                 DocumentTitle = title ?? "Untitled",
-                DocumentUrl = (url != null && url.StartsWith("http")) ? url : $"https://quotes.toscrape.com/{url}",
+                DocumentUrl = (url != null && url.StartsWith("http"))
+                    ? url
+                    : $"https://books.toscrape.com{url}",
                 DocumentType = "Image",
                 FileFormat = "jpg"
             });
@@ -324,3 +383,23 @@ public class Scraper
         return documents;
     }
 }
+
+public enum FormType
+{
+    SingleStep,
+    MultiStep,
+    Unknown
+}
+
+/*
+public class MyCustomScraper : Scraper
+{
+    public MyCustomScraper(IPage page) : base(page) { }
+
+    protected override async Task<bool> IsLoggedInAsync()
+    {
+        // Check for a site-specific element that only appears when logged in
+        var avatar = await _page.QuerySelectorAsync(".user-avatar");
+        return avatar != null && await avatar.IsVisibleAsync();
+    }
+}*/

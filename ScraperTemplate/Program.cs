@@ -11,6 +11,8 @@ class Program {
         await using var browser = await playwright.Chromium.LaunchAsync( new BrowserTypeLaunchOptions { Headless = false });
         var context = await browser.NewContextAsync();
         var page = await context.NewPageAsync();
+        var tester = new AntiBotTester(page);
+        await tester.RunAllTestsAsync();
         
         try
         {
