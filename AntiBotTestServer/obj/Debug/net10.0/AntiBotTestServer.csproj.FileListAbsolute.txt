@@ -27,3 +27,32 @@ C:\Users\Bruger 1\RiderProjects\C_Sharp_training\AntiBotTestServer\obj\Debug\net
 C:\Users\Bruger 1\RiderProjects\C_Sharp_training\AntiBotTestServer\obj\Debug\net10.0\AntiBotTestServer.pdb
 C:\Users\Bruger 1\RiderProjects\C_Sharp_training\AntiBotTestServer\obj\Debug\net10.0\AntiBotTestServer.genruntimeconfig.cache
 C:\Users\Bruger 1\RiderProjects\C_Sharp_training\AntiBotTestServer\obj\Debug\net10.0\ref\AntiBotTestServer.dll
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\bin\Debug\net10.0\appsettings.Development.json
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\bin\Debug\net10.0\appsettings.json
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\bin\Debug\net10.0\AntiBotTestServer.staticwebassets.endpoints.json
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\bin\Debug\net10.0\AntiBotTestServer.exe
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\bin\Debug\net10.0\AntiBotTestServer.deps.json
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\bin\Debug\net10.0\AntiBotTestServer.runtimeconfig.json
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\bin\Debug\net10.0\AntiBotTestServer.dll
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\bin\Debug\net10.0\AntiBotTestServer.pdb
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\rpswa.dswa.cache.json
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\AntiBotTestServer.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\AntiBotTestServer.AssemblyInfoInputs.cache
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\AntiBotTestServer.AssemblyInfo.cs
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\AntiBotTestServer.csproj.CoreCompileInputs.cache
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\AntiBotTestServer.MvcApplicationPartsAssemblyInfo.cache
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\AntiBotTestServer.sourcelink.json
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\rjimswa.dswa.cache.json
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\rjsmrazor.dswa.cache.json
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\rjsmcshtml.dswa.cache.json
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\scopedcss\bundle\AntiBotTestServer.styles.css
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\staticwebassets.build.json
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\staticwebassets.build.json.cache
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\staticwebassets.development.json
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\staticwebassets.build.endpoints.json
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\swae.build.ex.cache
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\AntiBotTestServer.dll
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\refint\AntiBotTestServer.dll
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\AntiBotTestServer.pdb
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\AntiBotTestServer.genruntimeconfig.cache
+C:\Users\elias\RiderProjects\træning\AntiBotTestServer\obj\Debug\net10.0\ref\AntiBotTestServer.dll

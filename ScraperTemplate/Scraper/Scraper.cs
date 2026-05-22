@@ -306,7 +306,7 @@ public class Scraper
 
     private async Task TakeScreenshotAsync(string label)
     {
-        var path = $"screenshot_{label}_{DateTime.Now:HHmmss}.png";
+        var path = $"ScreenShots/screenshot_{label}_{DateTime.Now:HHmmss}.png";
         await _page.ScreenshotAsync(new PageScreenshotOptions
         {
             Path = path,

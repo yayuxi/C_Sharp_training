@@ -28,7 +28,7 @@ public class AntiBotTester
 
         foreach (var (name, url) in tests)
         {
-            Console.WriteLine($"\n{Enumerable.Repeat("=", 50)}");
+            Console.WriteLine($"\n{new string('=', 50)}");
             Console.WriteLine($"Test: {name}");
 
             await RetryHelper.ExecuteWithEscalationAsync(
@@ -53,7 +53,7 @@ public class AntiBotTester
 
             await _page.ScreenshotAsync(new PageScreenshotOptions
             {
-                Path = $"antibot_{name.Replace(" ", "_").Replace("—", "")}.png",
+                Path = $"ScreenShots/antibot_{name.Replace(" ", "_").Replace("—", "")}.png",
                 FullPage = true
             });
         }

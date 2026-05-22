@@ -13,4 +13,8 @@
       <PackageReference Include="Microsoft.Playwright" Version="1.59.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="ScreenShots\" />
+    </ItemGroup>
+
 </Project>

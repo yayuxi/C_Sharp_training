@@ -239,15 +239,15 @@ public static class RetryHelper
         Console.WriteLine("[Tier 3] Recreating browser context with proxy...");
 
         // Close the old context and open a new one with proxy
-        var proxy = ProxySettings.Default;
+        // var proxy = ProxySettings.Default;
         var newContext = await browser.NewContextAsync(new BrowserNewContextOptions
         {
-            Proxy = new Proxy
-            {
-                Server = proxy.Server,
-                Username = proxy.Username,
-                Password = proxy.Password
-            },
+            // Proxy = new Proxy
+            // {
+            //     Server = proxy.Server,
+            //     Username = proxy.Username,
+            //     Password = proxy.Password
+            // },
             UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
                         "AppleWebKit/537.36 (KHTML, like Gecko) " +
                         "Chrome/124.0.0.0 Safari/537.36",
@@ -292,23 +292,31 @@ public static class RetryHelper
     /// </summary>
     private static async Task CheckForBlockAsync(IPage page)
     {
-        var url = page.Url.ToLower();
-        var content = await page.ContentAsync();
-        var contentLower = content.ToLower();
+        string url;
+        string contentLower;
+
+        try
+        {
+            await page.WaitForLoadStateAsync(LoadState.DOMContentLoaded,
+                new PageWaitForLoadStateOptions { Timeout = 5000 });
+
+            url = page.Url.ToLower();
+            contentLower = (await page.ContentAsync()).ToLower();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Check] Page still navigating — skipping block check: {ex.Message}");
+            return; // don't treat a navigating page as blocked
+        }
 
         var blockSignals = new[]
         {
-            "captcha",
-            "rate limit",
-            "too many requests",
-            "access denied",
-            "blocked",
-            "unusual traffic",
-            "bot detected",
-            "security check"
+            "captcha", "rate limit", "too many requests",
+            "access denied", "unusual traffic", "bot detected", "security check"
         };
 
-        var urlBlockSignals = new[] { "blocked", "captcha", "denied", "error" };
+        // Removed "blocked" — our own test server prints "BLOCKED" on passing pages too
+        var urlBlockSignals = new[] { "captcha", "denied" };
 
         if (blockSignals.Any(s => contentLower.Contains(s)) ||
             urlBlockSignals.Any(s => url.Contains(s)))
