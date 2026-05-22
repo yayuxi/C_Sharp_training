@@ -1,295 +1,47 @@
-﻿
-using Microsoft.Playwright;
+﻿using Microsoft.Playwright;
 using ScraperTemplate.Helpers;
 using ScraperTemplate.Models;
-using System.Text.Json;
 
 namespace ScraperTemplate.Scraper;
 
+/// <summary>
+/// ╔══════════════════════════════════════════════════════════════╗
+/// ║                    SCRAPER TEMPLATE                          ║
+/// ║                                                              ║
+/// ║  Two files need editing when building a new scraper:         ║
+/// ║  1. Program.cs  — set URL, login credentials                 ║
+/// ║  2. Scraper.cs  — implement ScrapeGuidelines()               ║
+/// ║                   and ScrapeGuidelineDocuments()             ║
+/// ║                                                              ║
+/// ║  Optionally override IsLoggedInAsync() if the default        ║
+/// ║  URL-based check doesn't work for the target site.           ║
+/// ╚══════════════════════════════════════════════════════════════╝
+/// </summary>
 public class Scraper
 {
     private readonly IPage _page;
-    private readonly string _sessionFile = "session.json";
-    private static readonly Random _random = new Random();
+    private readonly LoginHandler _loginHandler;
 
     public Scraper(IPage page)
     {
         _page = page;
+        _loginHandler = new LoginHandler(page);
     }
 
     // -------------------------------------------------------------------------
-    // Login
+    // Login — no changes needed here for most sites
     // -------------------------------------------------------------------------
 
     /// <summary>
-    /// Attempts to log in to the current page using the provided credentials.
-    /// Restores a saved session if available, otherwise performs a fresh login.
-    /// Call this after GotoAsync() on the login page.
+    /// Logs in using the provided credentials.
+    /// LoginHandler handles form detection, multi-step flows, and session persistence.
     /// </summary>
     public async Task LoginAsync(string username, string password)
-    {
-        if (await TryRestoreSessionAsync()) return;
-
-        await RetryHelper.ExecuteAsync(async () =>
-        {
-            var formType = await DetectFormTypeAsync();
-            Console.WriteLine($"[Login] Form type detected: {formType}");
-
-            switch (formType)
-            {
-                case FormType.SingleStep:
-                    await HandleSingleStepAsync(username, password);
-                    break;
-                case FormType.MultiStep:
-                    await HandleMultiStepAsync(username, password);
-                    break;
-                case FormType.Unknown:
-                    throw new ScraperException("[Login] Could not detect login form structure");
-            }
-
-            await _page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-            await TakeScreenshotAsync("04_after_login");
-
-            if (!await IsLoggedInAsync())
-                throw new ScraperException("[Login] Login failed — still on login page or credentials rejected");
-
-        }, "[Login] Attempting login");
-
-        await SaveSessionAsync();
-        Console.WriteLine("[Login] Login successful, session saved");
-    }
-
-    // -------------------------------------------------------------------------
-    // Form type detection
-    // -------------------------------------------------------------------------
-
-    private async Task<FormType> DetectFormTypeAsync()
-    {
-        var usernameVisible = await IsUsernameFieldVisibleAsync();
-        var passwordVisible = await IsPasswordFieldVisibleAsync();
-
-        if (usernameVisible && passwordVisible) return FormType.SingleStep;
-        if (usernameVisible && !passwordVisible) return FormType.MultiStep;
-        return FormType.Unknown;
-    }
-
-    private async Task<bool> IsUsernameFieldVisibleAsync()
-    {
-        var selectors = new[]
-        {
-            "input[type='email']",
-            "input[autocomplete='username']",
-            "input[autocomplete='email']",
-            "input[name*='user' i]",
-            "input[name*='email' i]",
-            "input[id*='user' i]",
-            "input[id*='email' i]",
-            "input[placeholder*='email' i]",
-            "input[placeholder*='username' i]",
-            "input[type='text']:not([type='password'])"
-        };
-
-        foreach (var selector in selectors)
-        {
-            var element = await _page.QuerySelectorAsync(selector);
-            if (element != null && await element.IsVisibleAsync()) return true;
-        }
-
-        return false;
-    }
-
-    private async Task<bool> IsPasswordFieldVisibleAsync()
-    {
-        var element = await _page.QuerySelectorAsync("input[type='password']");
-        return element != null && await element.IsVisibleAsync();
-    }
-
-    // -------------------------------------------------------------------------
-    // Form handlers
-    // -------------------------------------------------------------------------
-
-    private async Task HandleSingleStepAsync(string username, string password)
-    {
-        Console.WriteLine("[Login] Handling single-step form");
-        await FillUsernameAsync(username);
-        await TakeScreenshotAsync("02_username_filled");
-        await FillPasswordAsync(password);
-        await TakeScreenshotAsync("03_password_filled");
-        await ClickSubmitAsync();
-    }
-
-    private async Task HandleMultiStepAsync(string username, string password)
-    {
-        Console.WriteLine("[Login] Handling multi-step form — step 1: username");
-        await FillUsernameAsync(username);
-        await TakeScreenshotAsync("02_username_filled");
-        await ClickSubmitAsync();
-
-        Console.WriteLine("[Login] Waiting for password field...");
-        await _page.WaitForSelectorAsync("input[type='password']",
-            new PageWaitForSelectorOptions { Timeout = 10000 });
-        await PauseAsync(600, 1200);
-        await TakeScreenshotAsync("03_password_step");
-
-        Console.WriteLine("[Login] Step 2: password");
-        await FillPasswordAsync(password);
-        await TakeScreenshotAsync("03b_password_filled");
-        await ClickSubmitAsync();
-    }
-
-    // -------------------------------------------------------------------------
-    // Field filling
-    // -------------------------------------------------------------------------
-
-    private async Task FillUsernameAsync(string username)
-    {
-        var selectors = new[]
-        {
-            "input[type='email']",
-            "input[autocomplete='username']",
-            "input[autocomplete='email']",
-            "input[name='email']",
-            "input[name='username']",
-            "input[name='user']",
-            "input[name='login']",
-            "input[id*='email' i]",
-            "input[id*='user' i]",
-            "input[placeholder*='email' i]",
-            "input[placeholder*='username' i]",
-            "input[type='text']:not([type='password'])"
-        };
-
-        await FillFirstVisibleAsync(selectors, username, "username", excludePassword: true);
-    }
-
-    private async Task FillPasswordAsync(string password)
-    {
-        var element = await _page.QuerySelectorAsync("input[type='password']")
-            ?? throw new ScraperException("[Login] Password field not found");
-
-        await element.FillAsync(password);
-        Console.WriteLine("[Login] Filled password via type='password'");
-    }
-
-    private async Task FillFirstVisibleAsync(
-        string[] selectors,
-        string value,
-        string fieldName,
-        bool excludePassword = false)
-    {
-        foreach (var selector in selectors)
-        {
-            var element = await _page.QuerySelectorAsync(selector);
-            if (element == null) continue;
-            if (!await element.IsVisibleAsync()) continue;
-
-            if (excludePassword)
-            {
-                var type = await element.GetAttributeAsync("type") ?? "";
-                if (type == "password") continue;
-            }
-
-            await element.FillAsync(value);
-            Console.WriteLine($"[Login] Filled {fieldName} via '{selector}'");
-            return;
-        }
-
-        throw new ScraperException($"[Login] Could not find {fieldName} field on page");
-    }
-
-    // -------------------------------------------------------------------------
-    // Submit
-    // -------------------------------------------------------------------------
-
-    private async Task ClickSubmitAsync()
-    {
-        var buttonPatterns = new[]
-            { "sign in", "log in", "login", "next", "continue", "submit" };
-
-        var candidates = await _page.QuerySelectorAllAsync("button, input[type='submit']");
-
-        // Try to match by visible text first
-        foreach (var candidate in candidates)
-        {
-            if (!await candidate.IsVisibleAsync()) continue;
-
-            var text = (await candidate.InnerTextAsync()).Trim().ToLower();
-            var value = (await candidate.GetAttributeAsync("value") ?? "").ToLower();
-
-            if (buttonPatterns.Any(p => text.Contains(p) || value.Contains(p)))
-            {
-                Console.WriteLine($"[Login] Clicking submit: '{text}'");
-                await candidate.ClickAsync();
-                return;
-            }
-        }
-
-        // Fallback: first visible submit button regardless of text
-        foreach (var candidate in candidates)
-        {
-            if (await candidate.IsVisibleAsync())
-            {
-                Console.WriteLine("[Login] Clicking first visible button");
-                await candidate.ClickAsync();
-                return;
-            }
-        }
-
-        Console.WriteLine("[Login] No submit button found, pressing Enter");
-        await _page.Keyboard.PressAsync("Enter");
-    }
-
-    // -------------------------------------------------------------------------
-    // Session persistence
-    // -------------------------------------------------------------------------
-
-    private async Task<bool> TryRestoreSessionAsync()
-    {
-        if (!File.Exists(_sessionFile)) return false;
-
-        Console.WriteLine("[Login] Restoring saved session...");
-        try
-        {
-            var cookies = JsonSerializer.Deserialize<List<Cookie>>(
-                await File.ReadAllTextAsync(_sessionFile));
-
-            if (cookies != null)
-                await _page.Context.AddCookiesAsync(cookies);
-
-            await _page.ReloadAsync(new PageReloadOptions
-                { WaitUntil = WaitUntilState.NetworkIdle });
-
-            if (await IsLoggedInAsync())
-            {
-                Console.WriteLine("[Login] Session restored successfully");
-                return true;
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[Login] Session restore failed — {ex.Message}");
-        }
-
-        Console.WriteLine("[Login] Saved session expired, logging in fresh...");
-        File.Delete(_sessionFile);
-        return false;
-    }
-
-    private async Task SaveSessionAsync()
-    {
-        var cookies = await _page.Context.CookiesAsync();
-        await File.WriteAllTextAsync(_sessionFile,
-            JsonSerializer.Serialize(cookies,
-                new JsonSerializerOptions { WriteIndented = true }));
-    }
-
-    // -------------------------------------------------------------------------
-    // Verification and utilities
-    // -------------------------------------------------------------------------
+        => await _loginHandler.LoginAsync(username, password, IsLoggedInAsync);
 
     /// <summary>
-    /// Override this in a subclass to check for a site-specific post-login element.
-    /// Default checks that the URL no longer contains login-related keywords.
+    /// Override this if the target site doesn't change its URL after login.
+    /// Example: check for a user avatar or logout button instead.
     /// </summary>
     protected virtual async Task<bool> IsLoggedInAsync()
     {
@@ -304,50 +56,45 @@ public class Scraper
         return !isOnLoginPage || postLoginElement != null;
     }
 
-    private async Task TakeScreenshotAsync(string label)
-    {
-        var path = $"ScreenShots/screenshot_{label}_{DateTime.Now:HHmmss}.png";
-        await _page.ScreenshotAsync(new PageScreenshotOptions
-        {
-            Path = path,
-            FullPage = true
-        });
-        Console.WriteLine($"[Screenshot] {path}");
-    }
-
-    private static async Task PauseAsync(int minMs, int maxMs)
-        => await Task.Delay(_random.Next(minMs, maxMs));
-
     // -------------------------------------------------------------------------
-    // Scraping — replace with site-specific logic
+    // ↓↓↓ EDIT BELOW THIS LINE FOR EACH NEW SCRAPER ↓↓↓
     // -------------------------------------------------------------------------
 
+    /// <summary>
+    /// Scrapes the main list of guidelines from the target site.
+    /// Replace the selector logic below with the structure of the target site.
+    /// </summary>
     public async Task<List<Guideline>> ScrapeGuidelines()
     {
+        // Wait for the main content container to appear
+        // ↓ Change ".product_pod" to the main content selector on the target site
         // await RetryHelper.ExecuteAsync(
         //     () => _page.WaitForSelectorAsync(".product_pod"),
-        //     "Waiting for product elements to load");
+        //     "Waiting for content to load");
 
+        // ↓ Change ".product_pod h3 a" to the selector for each guideline item
         var elements = await _page.QuerySelectorAllAsync(".quote");
         var guidelines = new List<Guideline>();
 
         foreach (var element in elements)
         {
+            // ↓ Replace these with the actual fields from the target site
             var title = await element.InnerTextAsync();
             var url = await element.GetAttributeAsync("href");
             var tags = await element.QuerySelectorAllAsync(".tag");
             var tagsList = new List<string>();
             foreach (var tag in tags)                                   
                 tagsList.Add(await tag.InnerTextAsync());
+
             guidelines.Add(new Guideline
             {
-                GuidelineCode = Guid.NewGuid().ToString(),
+                GuidelineCode = Guid.NewGuid().ToString(), // ↓ replace with real code
                 Title = title.Trim(),
-                Category = string.Join("|", tagsList),
-                Step = "1",
-                Status = "Active",
-                Dated = DateTime.Now,
-                Summary = $"Template guideline: {title}",
+                Category = string.Join("|", tagsList),     // ↓ replace with real category
+                Step = "1",                                // ↓ replace with real step
+                Status = "Active",                         // ↓ replace with real status
+                Dated = DateTime.Now,                      // ↓ replace with real date
+                Summary = $"Template guideline: {title}",  // ↓ replace with real summary
                 SourceUrl = url ?? ""
             });
         }
@@ -355,51 +102,38 @@ public class Scraper
         return guidelines;
     }
 
+    /// <summary>
+    /// Scrapes document links associated with each guideline.
+    /// Replace the selector logic below with the structure of the target site.
+    /// </summary>
     public async Task<List<GuidelineDocument>> ScrapeGuidelineDocuments()
     {
+        // ↓ Change ".product_pod img" to the selector for document elements
         // await RetryHelper.ExecuteAsync(
         //     () => _page.WaitForSelectorAsync(".product_pod img"),
-        //     "Waiting for image elements to load");
+        //     "Waiting for document elements to load");
 
         var elements = await _page.QuerySelectorAllAsync(".quote");
         var documents = new List<GuidelineDocument>();
 
         foreach (var element in elements)
         {
+            // ↓ Replace these with the actual fields from the target site
             var title = await element.GetAttributeAsync("alt");
             var url = await element.GetAttributeAsync("src");
+
             documents.Add(new GuidelineDocument
             {
-                GuidelineCode = Guid.NewGuid().ToString(),
+                GuidelineCode = Guid.NewGuid().ToString(), // ↓ replace with real code
                 DocumentTitle = title ?? "Untitled",
                 DocumentUrl = (url != null && url.StartsWith("http"))
                     ? url
-                    : $"https://books.toscrape.com{url}",
-                DocumentType = "Image",
-                FileFormat = "jpg"
+                    : $"https://quotes.toscrape.com{url}",  // ↓ replace base URL
+                DocumentType = "Image",                    // ↓ replace with real type
+                FileFormat = "jpg"                         // ↓ replace with real format
             });
         }
 
         return documents;
     }
 }
-
-public enum FormType
-{
-    SingleStep,
-    MultiStep,
-    Unknown
-}
-
-/*
-public class MyCustomScraper : Scraper
-{
-    public MyCustomScraper(IPage page) : base(page) { }
-
-    protected override async Task<bool> IsLoggedInAsync()
-    {
-        // Check for a site-specific element that only appears when logged in
-        var avatar = await _page.QuerySelectorAsync(".user-avatar");
-        return avatar != null && await avatar.IsVisibleAsync();
-    }
-}*/

@@ -1,10 +1,32 @@
 [
   {
+    "name": "sync_cookie_csrf",
+    "value": "3845743146fake",
+    "domain": ".mc.yandex.com",
+    "path": "/",
+    "expires": 1.7794572E+09,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": 2,
+    "partitionKey": null
+  },
+  {
     "name": "_ym_isad",
     "value": "2",
     "domain": ".sannysoft.com",
     "path": "/",
     "expires": 1.7795269E+09,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": 2,
+    "partitionKey": null
+  },
+  {
+    "name": "sync_cookie_csrf",
+    "value": "2799679990fake",
+    "domain": ".mc.yandex.ru",
+    "path": "/",
+    "expires": 1.7794572E+09,
     "httpOnly": false,
     "secure": true,
     "sameSite": 2,
@@ -20,6 +42,28 @@
     "secure": true,
     "sameSite": 2,
     "partitionKey": "https://sannysoft.com"
+  },
+  {
+    "name": "sync_cookie_csrf_secondary",
+    "value": "1986400813fake",
+    "domain": ".mc.yandex.com",
+    "path": "/",
+    "expires": 1.7794572E+09,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": 2,
+    "partitionKey": null
+  },
+  {
+    "name": "sync_cookie_csrf_secondary",
+    "value": "4177368397fake",
+    "domain": ".mc.yandex.ru",
+    "path": "/",
+    "expires": 1.7794572E+09,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": 2,
+    "partitionKey": null
   },
   {
     "name": "sync_cookie_ok_secondary",
@@ -60,28 +104,6 @@
     "domain": ".sannysoft.com",
     "path": "/",
     "expires": 1.8109908E+09,
-    "httpOnly": false,
-    "secure": true,
-    "sameSite": 2,
-    "partitionKey": null
-  },
-  {
-    "name": "sync_cookie_csrf",
-    "value": "2380372229fake",
-    "domain": ".mc.yandex.com",
-    "path": "/",
-    "expires": 1.7794555E+09,
-    "httpOnly": false,
-    "secure": true,
-    "sameSite": 2,
-    "partitionKey": null
-  },
-  {
-    "name": "sync_cookie_csrf",
-    "value": "2616762057fake",
-    "domain": ".mc.yandex.ru",
-    "path": "/",
-    "expires": 1.7794555E+09,
     "httpOnly": false,
     "secure": true,
     "sameSite": 2,
@@ -154,28 +176,6 @@
     "partitionKey": null
   },
   {
-    "name": "sync_cookie_csrf_secondary",
-    "value": "4199886335fake",
-    "domain": ".mc.yandex.com",
-    "path": "/",
-    "expires": 1.7794555E+09,
-    "httpOnly": false,
-    "secure": true,
-    "sameSite": 2,
-    "partitionKey": null
-  },
-  {
-    "name": "sync_cookie_csrf_secondary",
-    "value": "2294372840fake",
-    "domain": ".mc.yandex.ru",
-    "path": "/",
-    "expires": 1.7794555E+09,
-    "httpOnly": false,
-    "secure": true,
-    "sameSite": 2,
-    "partitionKey": null
-  },
-  {
     "name": "yandexuid",
     "value": "2877795091779454899",
     "domain": ".yandex.ru",
@@ -210,7 +210,7 @@
   },
   {
     "name": "session",
-    "value": "eyJjc3JmX3Rva2VuIjoiR3pIb1lKZ2xrTUVLYnhPVWh5cEFlQkxOZlBjaVNyYXZWUnVuSXdYanFUdFFXRENzWm1GZCIsInVzZXJuYW1lIjoieW91ckBlbWFpbC5jb20ifQ.ahBUZA.0g9r9Il7cmWF32LQAHb55qUMIGk",
+    "value": "eyJjc3JmX3Rva2VuIjoidUhaVHJSQVVuRkx5aFNhTmdJZFZ0Q01lem1YRVlXc0twUVBKZmtpYnZCcURqd0dvbHhPYyIsInVzZXJuYW1lIjoieW91ckBlbWFpbC5jb20ifQ.ahBaRw.Xf3Mo5VAC8-ayMEukmjsAkLAVgg",
     "domain": "quotes.toscrape.com",
     "path": "/",
     "expires": -1,

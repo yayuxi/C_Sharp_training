@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AntiBotTestServer")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+724ca53d0fa5a771beef3bab8cd7464e4e6dc11c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+69021ccd471f1685eb58346dd3c0173cbb67286c")]
 [assembly: System.Reflection.AssemblyProductAttribute("AntiBotTestServer")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AntiBotTestServer")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

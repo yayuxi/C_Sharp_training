@@ -1,44 +1,65 @@
 ﻿using Microsoft.Playwright;
-using ScraperTemplate.Models;
-using System.Collections.Generic;
 using ScraperTemplate.Export;
+using ScraperTemplate.Scraper;
 
 namespace ScraperTemplate;
 
-class Program {
-    static async Task Main(string[] args) {
+class Program
+{
+    static async Task Main(string[] args)
+    {
+        // ╔══════════════════════════════════════════════════════════════╗
+        // ║                    CONFIGURATION                             ║
+        // ║  These are the only values you need to change per scraper    ║
+        // ╚══════════════════════════════════════════════════════════════╝
+
+        // ↓ URL of the page to scrape (or login page if login is required)
+        const string targetUrl = "https://quotes.toscrape.com/login";
+
+        // ↓ Set to true if the site requires login, false to skip
+        const bool requiresLogin = true;
+
+        // ↓ Credentials — only used if requiresLogin is true
+        const string username = "your@email.com";
+        const string password = "yourpassword";
+
+        // ╔══════════════════════════════════════════════════════════════╗
+        // ║              NO CHANGES NEEDED BELOW THIS LINE               ║
+        // ╚══════════════════════════════════════════════════════════════╝
+
         using var playwright = await Playwright.CreateAsync();
-        await using var browser = await playwright.Chromium.LaunchAsync( new BrowserTypeLaunchOptions { Headless = false });
+        await using var browser = await playwright.Chromium.LaunchAsync(
+            new BrowserTypeLaunchOptions { Headless = false });
         var context = await browser.NewContextAsync();
         var page = await context.NewPageAsync();
-        var tester = new AntiBotTester(page);
-        await tester.RunAllTestsAsync();
-        
+        // var tester = new AntiBotTester(page);
+        // await tester.RunAllTestsAsync();
+
         try
         {
-            /*
-             * Change the link in the following line of code to the website that needs to be scraped.
-             */
-            await page.GotoAsync("http://quotes.toscrape.com/login"); // navigate to login page first
-
             var scraper = new Scraper.Scraper(page);
 
-            // Login — skip this block entirely if the site has no login wall
-            await scraper.LoginAsync(
-                username: "your@email.com",
-                password: "yourpassword"
-            );
+            if (requiresLogin)
+            {
+                await page.GotoAsync(targetUrl, new PageGotoOptions
+                    { WaitUntil = WaitUntilState.NetworkIdle });
+                await scraper.LoginAsync(username, password);
+            }
+            else
+            {
+                await page.GotoAsync(targetUrl, new PageGotoOptions
+                    { WaitUntil = WaitUntilState.NetworkIdle });
+            }
 
-            Console.WriteLine($"Landed on: {page.Url}");
-            // Now navigate to the actual content page after login
-            // await page.GotoAsync("http://quotes.toscrape.com");
-            // Scrape guidelines
             var guidelines = await scraper.ScrapeGuidelines();
             CsvExporter.Export(guidelines, "guidelines.csv");
 
-            // Scrape documents
             var documents = await scraper.ScrapeGuidelineDocuments();
             CsvExporter.Export(documents, "documents.csv");
+        }
+        catch (ScraperException ex)
+        {
+            Console.WriteLine($"[Fatal] {ex.Message}");
         }
         finally
         {
