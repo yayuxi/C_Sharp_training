@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ScraperTemplate")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+69021ccd471f1685eb58346dd3c0173cbb67286c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+90f47453fbc76231f18b91da12d37ba111e6a9a9")]
 [assembly: System.Reflection.AssemblyProductAttribute("ScraperTemplate")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ScraperTemplate")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,38 +1,5 @@
 [
   {
-    "name": "sync_cookie_csrf",
-    "value": "3845743146fake",
-    "domain": ".mc.yandex.com",
-    "path": "/",
-    "expires": 1.7794572E+09,
-    "httpOnly": false,
-    "secure": true,
-    "sameSite": 2,
-    "partitionKey": null
-  },
-  {
-    "name": "_ym_isad",
-    "value": "2",
-    "domain": ".sannysoft.com",
-    "path": "/",
-    "expires": 1.7795269E+09,
-    "httpOnly": false,
-    "secure": true,
-    "sameSite": 2,
-    "partitionKey": null
-  },
-  {
-    "name": "sync_cookie_csrf",
-    "value": "2799679990fake",
-    "domain": ".mc.yandex.ru",
-    "path": "/",
-    "expires": 1.7794572E+09,
-    "httpOnly": false,
-    "secure": true,
-    "sameSite": 2,
-    "partitionKey": null
-  },
-  {
     "name": "receive-cookie-deprecation",
     "value": "1",
     "domain": ".yandex.com",
@@ -42,39 +9,6 @@
     "secure": true,
     "sameSite": 2,
     "partitionKey": "https://sannysoft.com"
-  },
-  {
-    "name": "sync_cookie_csrf_secondary",
-    "value": "1986400813fake",
-    "domain": ".mc.yandex.com",
-    "path": "/",
-    "expires": 1.7794572E+09,
-    "httpOnly": false,
-    "secure": true,
-    "sameSite": 2,
-    "partitionKey": null
-  },
-  {
-    "name": "sync_cookie_csrf_secondary",
-    "value": "4177368397fake",
-    "domain": ".mc.yandex.ru",
-    "path": "/",
-    "expires": 1.7794572E+09,
-    "httpOnly": false,
-    "secure": true,
-    "sameSite": 2,
-    "partitionKey": null
-  },
-  {
-    "name": "sync_cookie_ok_secondary",
-    "value": "synced",
-    "domain": ".mc.yandex.com",
-    "path": "/",
-    "expires": 1.7795412E+09,
-    "httpOnly": false,
-    "secure": true,
-    "sameSite": 2,
-    "partitionKey": null
   },
   {
     "name": "bh",
@@ -210,7 +144,7 @@
   },
   {
     "name": "session",
-    "value": "eyJjc3JmX3Rva2VuIjoidUhaVHJSQVVuRkx5aFNhTmdJZFZ0Q01lem1YRVlXc0twUVBKZmtpYnZCcURqd0dvbHhPYyIsInVzZXJuYW1lIjoieW91ckBlbWFpbC5jb20ifQ.ahBaRw.Xf3Mo5VAC8-ayMEukmjsAkLAVgg",
+    "value": "eyJjc3JmX3Rva2VuIjoiYmtGRVdUTlF6d0hjaUpqcURzZkJBdmF0VUNPTVJ4dUxaeWdZR2VQclhWcG1kS0lvU2hubCIsInVzZXJuYW1lIjoieW91ckBlbWFpbC5jb20ifQ.ahQRdg.tprGth8CxUkSl3v9t9iIa8Rw5zk",
     "domain": "quotes.toscrape.com",
     "path": "/",
     "expires": -1,

@@ -1,0 +1,156 @@
+[
+  {
+    "name": "receive-cookie-deprecation",
+    "value": "1",
+    "domain": ".yandex.com",
+    "path": "/",
+    "expires": 1.8109908E+09,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": 2,
+    "partitionKey": "https://sannysoft.com"
+  },
+  {
+    "name": "bh",
+    "value": "EiciQ2hyb21pdW0iO3Y9IjE0NyIsICJOb3QuQS9CcmFuZCI7dj0iOCIqAj8wOgkiV2luZG93cyJgsqfB0AZqHtzK4f8IktihsQOfz\u002BHqA/v68OcN6//99g\u002Bbh8\u002BHCA==",
+    "domain": ".yandex.ru",
+    "path": "/",
+    "expires": 1.8140148E+09,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": 2,
+    "partitionKey": null
+  },
+  {
+    "name": "_ym_uid",
+    "value": "1779454896411331076",
+    "domain": ".sannysoft.com",
+    "path": "/",
+    "expires": 1.8109908E+09,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": 2,
+    "partitionKey": null
+  },
+  {
+    "name": "_ym_d",
+    "value": "1779454896",
+    "domain": ".sannysoft.com",
+    "path": "/",
+    "expires": 1.8109908E+09,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": 2,
+    "partitionKey": null
+  },
+  {
+    "name": "yabs-sid",
+    "value": "277478861779454899",
+    "domain": "mc.yandex.com",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": 2,
+    "partitionKey": null
+  },
+  {
+    "name": "i",
+    "value": "9sRLWtiRO2ghhN9DdayTo6fC5O1io6qRODmFNQH2RDUAzsL4g3yuYNujvm6e7E8\u002B8oXPexqSrxQayZ/5PO6G17axwow=",
+    "domain": ".yandex.com",
+    "path": "/",
+    "expires": 1.8140148E+09,
+    "httpOnly": true,
+    "secure": true,
+    "sameSite": 2,
+    "partitionKey": null
+  },
+  {
+    "name": "yandexuid",
+    "value": "2877795091779454899",
+    "domain": ".yandex.com",
+    "path": "/",
+    "expires": 1.8140148E+09,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": 2,
+    "partitionKey": null
+  },
+  {
+    "name": "yuidss",
+    "value": "2877795091779454899",
+    "domain": ".yandex.com",
+    "path": "/",
+    "expires": 1.8109908E+09,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": 2,
+    "partitionKey": null
+  },
+  {
+    "name": "ymex",
+    "value": "1810990899.yrts.1779454899#1810990899.yrtsi.1779454899",
+    "domain": ".yandex.com",
+    "path": "/",
+    "expires": 1.8109908E+09,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": 2,
+    "partitionKey": null
+  },
+  {
+    "name": "bh",
+    "value": "EiciQ2hyb21pdW0iO3Y9IjE0NyIsICJOb3QuQS9CcmFuZCI7dj0iOCIaA3g4NiINMTQ3LjAuNzcyNy4xNSoCPzA6CSJXaW5kb3dzIkIGMTkuMC4wSgI2NFI2IkNocm9taXVtIjt2PSIxNDcuMC43NzI3LjE1IiwiTm90LkEvQnJhbmQiO3Y9IjguMC4wLjAiYLOnwdAGah7cyuH/CJLYobEDn8/h6gP7\u002BvDnDev//fYPm4fPhwg=",
+    "domain": ".yandex.com",
+    "path": "/",
+    "expires": 1.8140148E+09,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": 2,
+    "partitionKey": null
+  },
+  {
+    "name": "yandexuid",
+    "value": "2877795091779454899",
+    "domain": ".yandex.ru",
+    "path": "/",
+    "expires": 1.8140148E+09,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": 2,
+    "partitionKey": null
+  },
+  {
+    "name": "yuidss",
+    "value": "2877795091779454899",
+    "domain": ".yandex.ru",
+    "path": "/",
+    "expires": 1.8140148E+09,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": 2,
+    "partitionKey": null
+  },
+  {
+    "name": "i",
+    "value": "9sRLWtiRO2ghhN9DdayTo6fC5O1io6qRODmFNQH2RDUAzsL4g3yuYNujvm6e7E8\u002B8oXPexqSrxQayZ/5PO6G17axwow=",
+    "domain": ".yandex.ru",
+    "path": "/",
+    "expires": 1.8140148E+09,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": 2,
+    "partitionKey": null
+  },
+  {
+    "name": "session",
+    "value": "eyJjc3JmX3Rva2VuIjoiYmtGRVdUTlF6d0hjaUpqcURzZkJBdmF0VUNPTVJ4dUxaeWdZR2VQclhWcG1kS0lvU2hubCIsInVzZXJuYW1lIjoieW91ckBlbWFpbC5jb20ifQ.ahQRdg.tprGth8CxUkSl3v9t9iIa8Rw5zk",
+    "domain": "quotes.toscrape.com",
+    "path": "/",
+    "expires": -1,
+    "httpOnly": true,
+    "secure": false,
+    "sameSite": 1,
+    "partitionKey": null
+  }
+]

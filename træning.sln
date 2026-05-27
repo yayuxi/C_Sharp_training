@@ -16,6 +16,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ICHScraper", "ICHScraper\IC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScraperTemplate", "ScraperTemplate\ScraperTemplate.csproj", "{AC4E99A6-F6F8-4018-BF0B-0A47B5A13A91}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoScraper", "AutoScraper\AutoScraper.csproj", "{B5D8E9C7-2A1F-4B3D-9E8C-5F7A6B4C9D2E}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoginTester", "LoginTester\LoginTester.csproj", "{DE4F6CFC-493B-41FB-91C4-A0EC88FB42CB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AntiBotTestServer", "AntiBotTestServer\AntiBotTestServer.csproj", "{4E2240D4-0BDF-40BD-90B6-6AEA048140C9}"
@@ -58,6 +60,10 @@ Global
 		{AC4E99A6-F6F8-4018-BF0B-0A47B5A13A91}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AC4E99A6-F6F8-4018-BF0B-0A47B5A13A91}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AC4E99A6-F6F8-4018-BF0B-0A47B5A13A91}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5D8E9C7-2A1F-4B3D-9E8C-5F7A6B4C9D2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5D8E9C7-2A1F-4B3D-9E8C-5F7A6B4C9D2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5D8E9C7-2A1F-4B3D-9E8C-5F7A6B4C9D2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5D8E9C7-2A1F-4B3D-9E8C-5F7A6B4C9D2E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DE4F6CFC-493B-41FB-91C4-A0EC88FB42CB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DE4F6CFC-493B-41FB-91C4-A0EC88FB42CB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE4F6CFC-493B-41FB-91C4-A0EC88FB42CB}.Release|Any CPU.ActiveCfg = Release|Any CPU

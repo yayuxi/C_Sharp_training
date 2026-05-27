@@ -22,6 +22,12 @@ class Program
         // ↓ Credentials — only used if requiresLogin is true
         const string username = "your@email.com";
         const string password = "yourpassword";
+        
+        // ↓ Anti-bot protection tier to apply from the start:
+        //   Tier 1 — No protection       (public sites, no bot detection)
+        //   Tier 2 — Human-like behavior (basic bot detection, rate limiting)
+        //   Tier 3 — Full stealth        (fingerprinting, strong bot detection)
+        const int antiBotTier = 1; 
 
         // ╔══════════════════════════════════════════════════════════════╗
         // ║              NO CHANGES NEEDED BELOW THIS LINE               ║
@@ -32,12 +38,12 @@ class Program
             new BrowserTypeLaunchOptions { Headless = false });
         var context = await browser.NewContextAsync();
         var page = await context.NewPageAsync();
-        // var tester = new AntiBotTester(page);
-        // await tester.RunAllTestsAsync();
+        var tester = new AntiBotTester(page);
+        await tester.RunAllTestsAsync();
 
         try
         {
-            var scraper = new Scraper.Scraper(page);
+            var scraper = new Scraper.Scraper(page, antiBotTier);
 
             if (requiresLogin)
             {

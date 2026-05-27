@@ -21,10 +21,12 @@ public class Scraper
 {
     private readonly IPage _page;
     private readonly LoginHandler _loginHandler;
-
-    public Scraper(IPage page)
+    private readonly int _antiBotTier;
+    
+    public Scraper(IPage page, int antiBotTier = 1)
     {
         _page = page;
+        _antiBotTier = antiBotTier;
         _loginHandler = new LoginHandler(page);
     }
 
@@ -67,12 +69,15 @@ public class Scraper
     public async Task<List<Guideline>> ScrapeGuidelines()
     {
         // Wait for the main content container to appear
-        // ↓ Change ".product_pod" to the main content selector on the target site
-        // await RetryHelper.ExecuteAsync(
-        //     () => _page.WaitForSelectorAsync(".product_pod"),
-        //     "Waiting for content to load");
+        // ↓ Change "url" to the main content selector on the target site
+        // await RetryHelper.ExecuteWithEscalationAsync(
+        //     () => _page.GotoAsync(url, new PageGotoOptions
+        //         { WaitUntil = WaitUntilState.NetworkIdle }),
+        //     _page, url,
+        //     "Loading page",
+        //     startingTier: _antiBotTier);
 
-        // ↓ Change ".product_pod h3 a" to the selector for each guideline item
+        // ↓ Change ".quote" to the selector for each guideline item
         var elements = await _page.QuerySelectorAllAsync(".quote");
         var guidelines = new List<Guideline>();
 
@@ -108,10 +113,13 @@ public class Scraper
     /// </summary>
     public async Task<List<GuidelineDocument>> ScrapeGuidelineDocuments()
     {
-        // ↓ Change ".product_pod img" to the selector for document elements
-        // await RetryHelper.ExecuteAsync(
-        //     () => _page.WaitForSelectorAsync(".product_pod img"),
-        //     "Waiting for document elements to load");
+        // ↓ Change "url" to the selector for document elements
+        // await RetryHelper.ExecuteWithEscalationAsync(
+        //     () => _page.GotoAsync(url, new PageGotoOptions
+        //         { WaitUntil = WaitUntilState.NetworkIdle }),
+        //     _page, url,
+        //     "Loading page",
+        //     startingTier: _antiBotTier);  
 
         var elements = await _page.QuerySelectorAllAsync(".quote");
         var documents = new List<GuidelineDocument>();

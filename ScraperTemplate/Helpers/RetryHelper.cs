@@ -6,34 +6,36 @@ public static class RetryHelper
 {
     private const int MaxRetries = 3;
     private const int BaseDelayMs = 3000;
-
+    
     /// <summary>
-    /// Executes an action with escalating anti-bot protection on each retry.
-    /// Tier 1: Raw request — fastest, works on unprotected sites
-    /// Tier 2: Human-like behavior — delays, mouse movement, realistic headers
-    /// Tier 3: Full stealth — all tier 2 measures + proxy + JS fingerprint spoofing
+    /// Executes an action with anti-bot protection starting at the specified tier,
+    /// escalating on each retry if blocked.
     /// </summary>
     public static async Task<T> ExecuteWithEscalationAsync<T>(
         Func<Task<T>> action,
         IPage page,
         string url,
-        string context = "")
+        string context = "",
+        int startingTier = 1)  // ← new parameter
     {
         for (int attempt = 1; attempt <= MaxRetries; attempt++)
         {
+            // Tier is clamped to 3 maximum
+            var tier = Math.Min(startingTier + attempt - 1, 3);
+
             try
             {
                 Console.WriteLine($"[Retry] Attempt {attempt}/{MaxRetries} — " +
-                                  $"Tier {attempt} protection — {context}");
+                                  $"Tier {tier} protection — {context}");
 
-                await ApplyTierAsync(page, attempt);
+                await ApplyTierAsync(page, tier);
                 var result = await action();
                 await CheckForBlockAsync(page);
                 return result;
             }
             catch (BlockedException ex)
             {
-                Console.WriteLine($"[Blocked] {ex.Message} — escalating to tier {attempt + 1}");
+                Console.WriteLine($"[Blocked] {ex.Message} — escalating to tier {tier + 1}");
                 if (attempt == MaxRetries) throw;
                 await Task.Delay(BaseDelayMs * attempt);
             }
@@ -47,20 +49,19 @@ public static class RetryHelper
         throw new ScraperException($"All {MaxRetries} attempts failed for: {context}");
     }
 
-    /// <summary>
-    /// Overload for void actions.
-    /// </summary>
+// Overload for void actions
     public static async Task ExecuteWithEscalationAsync(
         Func<Task> action,
         IPage page,
         string url,
-        string context = "")
+        string context = "",
+        int startingTier = 1)
     {
         await ExecuteWithEscalationAsync<bool>(async () =>
         {
             await action();
             return true;
-        }, page, url, context);
+        }, page, url, context, startingTier);
     }
 
     /// <summary>
