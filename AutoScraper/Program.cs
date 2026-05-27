@@ -1,5 +1,6 @@
 ﻿using Microsoft.Playwright;
 using ScraperTemplate.Export;
+using ScraperTemplate.Helpers;
 using ScraperTemplate.Scraper;
 
 namespace ScraperTemplate;
@@ -22,6 +23,18 @@ class Program
         // ↓ Credentials — only used if requiresLogin is true
         const string username = "your@email.com";
         const string password = "yourpassword";
+        
+        // ↓ Set to true to use the autonomous AI-powered scraper
+        const bool useAutoScraper = true;
+
+        // ↓ AI provider: AiProvider.HuggingFace or AiProvider.Anthropic
+        const AiProvider aiProvider = AiProvider.Anthropic;
+
+        // ↓ API key for the chosen provider
+        const string aiApiKey = "hf_your_key_here";
+
+        // ↓ Describe what you're looking for — the AI uses this as its goal
+        const string scrapingGoal = "quotes and author names"; // regulatory documents, guidelines, or PDF files
 
         // ╔══════════════════════════════════════════════════════════════╗
         // ║              NO CHANGES NEEDED BELOW THIS LINE               ║
@@ -32,18 +45,24 @@ class Program
             new BrowserTypeLaunchOptions { Headless = false });
         var context = await browser.NewContextAsync();
         var page = await context.NewPageAsync();
-        var tester = new AntiBotTester(page);
-        await tester.RunAllTestsAsync();
+        // var tester = new AntiBotTester(page);
+        // await tester.RunAllTestsAsync();
 
         try
         {
-            var scraper = new Scraper.Scraper(page);
-
+            // Step 1: handle login if required
             if (requiresLogin)
             {
                 await page.GotoAsync(targetUrl, new PageGotoOptions
                     { WaitUntil = WaitUntilState.NetworkIdle });
+
+                var scraper = new Scraper.Scraper(page);
                 await scraper.LoginAsync(username, password);
+
+                // After login the site redirects — navigate to the actual content page
+                // ↓ Change this to the content URL if different from the login URL
+                await page.GotoAsync("https://quotes.toscrape.com", new PageGotoOptions
+                    { WaitUntil = WaitUntilState.NetworkIdle });
             }
             else
             {
@@ -51,11 +70,26 @@ class Program
                     { WaitUntil = WaitUntilState.NetworkIdle });
             }
 
-            var guidelines = await scraper.ScrapeGuidelines();
-            CsvExporter.Export(guidelines, "guidelines.csv");
+            // Step 2: scrape using either auto or manual scraper
+            if (useAutoScraper)
+            {
+                var autoScraper = new AutoScraper(page, aiApiKey, aiProvider);
+                var documents = await autoScraper.ScrapeDocumentsAsync(targetUrl, scrapingGoal);
+                CsvExporter.Export(documents, "auto_documents.csv");
+                Console.WriteLine($"[Done] Saved {documents.Count} documents to auto_documents.csv");
+            }
+            else
+            {
+                var scraper = new Scraper.Scraper(page);
+                var guidelines = await scraper.ScrapeGuidelines();
+                CsvExporter.Export(guidelines, "guidelines.csv");
 
-            var documents = await scraper.ScrapeGuidelineDocuments();
-            CsvExporter.Export(documents, "documents.csv");
+                var documents = await scraper.ScrapeGuidelineDocuments();
+                CsvExporter.Export(documents, "documents.csv");
+
+                Console.WriteLine($"[Done] Saved {guidelines.Count} guidelines " +
+                                  $"and {documents.Count} documents");
+            }
         }
         catch (ScraperException ex)
         {

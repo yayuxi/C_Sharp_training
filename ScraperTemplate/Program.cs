@@ -28,6 +28,8 @@ class Program
         //   Tier 2 — Human-like behavior (basic bot detection, rate limiting)
         //   Tier 3 — Full stealth        (fingerprinting, strong bot detection)
         const int antiBotTier = 1; 
+        
+        
 
         // ╔══════════════════════════════════════════════════════════════╗
         // ║              NO CHANGES NEEDED BELOW THIS LINE               ║
