@@ -1,6 +1,5 @@
 ﻿using Microsoft.Playwright;
 using ScraperTemplate.Export;
-using ScraperTemplate.Helpers;
 using ScraperTemplate.Scraper;
 
 namespace ScraperTemplate;
@@ -10,8 +9,8 @@ class Program
     static async Task Main(string[] args)
     {
         // ╔══════════════════════════════════════════════════════════════╗
-        // ║                    CONFIGURATION                             ║
-        // ║  These are the only values you need to change per scraper    ║
+        // ║                    CONFIGURATION                            ║
+        // ║  These are the only values you need to change per scraper   ║
         // ╚══════════════════════════════════════════════════════════════╝
 
         // ↓ URL of the page to scrape (or login page if login is required)
@@ -21,23 +20,20 @@ class Program
         const bool requiresLogin = true;
 
         // ↓ Credentials — only used if requiresLogin is true
-        const string username = "your@email.com";
-        const string password = "yourpassword";
-        
+        const string username = "user";
+        const string password = "password";
+
         // ↓ Set to true to use the autonomous AI-powered scraper
         const bool useAutoScraper = true;
 
-        // ↓ AI provider: AiProvider.HuggingFace or AiProvider.Anthropic
-        const AiProvider aiProvider = AiProvider.Anthropic;
-
-        // ↓ API key for the chosen provider
-        const string aiApiKey = "hf_your_key_here";
+        // ↓ Hugging Face API key — only needed if useAutoScraper is true
+        const string huggingFaceApiKey = "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";
 
         // ↓ Describe what you're looking for — the AI uses this as its goal
-        const string scrapingGoal = "quotes and author names"; // regulatory documents, guidelines, or PDF files
+        const string scrapingGoal = "quotes and author names";
 
         // ╔══════════════════════════════════════════════════════════════╗
-        // ║              NO CHANGES NEEDED BELOW THIS LINE               ║
+        // ║              NO CHANGES NEEDED BELOW THIS LINE              ║
         // ╚══════════════════════════════════════════════════════════════╝
 
         using var playwright = await Playwright.CreateAsync();
@@ -45,8 +41,6 @@ class Program
             new BrowserTypeLaunchOptions { Headless = false });
         var context = await browser.NewContextAsync();
         var page = await context.NewPageAsync();
-        // var tester = new AntiBotTester(page);
-        // await tester.RunAllTestsAsync();
 
         try
         {
@@ -73,7 +67,7 @@ class Program
             // Step 2: scrape using either auto or manual scraper
             if (useAutoScraper)
             {
-                var autoScraper = new AutoScraper(page, aiApiKey, aiProvider);
+                var autoScraper = new AutoScraper(page, huggingFaceApiKey);
                 var documents = await autoScraper.ScrapeDocumentsAsync(targetUrl, scrapingGoal);
                 CsvExporter.Export(documents, "auto_documents.csv");
                 Console.WriteLine($"[Done] Saved {documents.Count} documents to auto_documents.csv");
