@@ -27,7 +27,7 @@ class Program
         const bool useAutoScraper = true;
 
         // ↓ Hugging Face API key — only needed if useAutoScraper is true
-        const string huggingFaceApiKey = "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";
+        const string huggingFaceApiKey = "HF_API_KEY";
 
         // ↓ Describe what you're looking for — the AI uses this as its goal
         const string scrapingGoal = "quotes and author names";
