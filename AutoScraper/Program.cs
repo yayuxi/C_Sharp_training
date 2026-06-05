@@ -1,5 +1,6 @@
 ﻿using Microsoft.Playwright;
 using ScraperTemplate.Export;
+using ScraperTemplate.Helpers;
 using ScraperTemplate.Scraper;
 
 namespace ScraperTemplate;
@@ -27,7 +28,8 @@ class Program
         const bool useAutoScraper = true;
 
         // ↓ Hugging Face API key — only needed if useAutoScraper is true
-        const string huggingFaceApiKey = "HF_API_KEY";
+        const AiProvider aiProvider = AiProvider.Ollama;
+        const string huggingFaceApiKey = "";
 
         // ↓ Describe what you're looking for — the AI uses this as its goal
         const string scrapingGoal = "quotes and author names";

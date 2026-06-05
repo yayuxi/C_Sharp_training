@@ -27,7 +27,7 @@ class Program
         //   Tier 1 — No protection       (public sites, no bot detection)
         //   Tier 2 — Human-like behavior (basic bot detection, rate limiting)
         //   Tier 3 — Full stealth        (fingerprinting, strong bot detection)
-        const int antiBotTier = 1; 
+        const int antiBotTier = 1;
         
         
 

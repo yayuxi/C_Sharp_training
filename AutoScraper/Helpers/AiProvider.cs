@@ -7,7 +7,8 @@ namespace ScraperTemplate.Helpers;
 public enum AiProvider
 {
     HuggingFace,
-    Anthropic
+    Anthropic,
+    Ollama
 }
 
 /// <summary>
@@ -30,6 +31,7 @@ public class AiClient
         {
             AiProvider.HuggingFace => "mistralai/Mistral-7B-Instruct-v0.3",
             AiProvider.Anthropic   => "claude-haiku-4-5-20251001", // fastest + cheapest
+            AiProvider.Ollama      => "mistral",
             _ => throw new ArgumentOutOfRangeException(nameof(provider))
         };
 
@@ -105,6 +107,7 @@ public class AiClient
     {
         AiProvider.HuggingFace => CallHuggingFaceAsync(prompt),
         AiProvider.Anthropic   => CallAnthropicAsync(prompt),
+        AiProvider.Ollama      => CallOllamaAsync(prompt),
         _ => throw new ArgumentOutOfRangeException()
     };
 
@@ -208,6 +211,50 @@ public class AiClient
         }
 
         throw new ScraperException("[AI] Anthropic API failed after 3 attempts");
+    }
+    
+    private async Task<string> CallOllamaAsync(string prompt)
+    {
+        var payload = JsonSerializer.Serialize(new
+        {
+            model = _model, // "mistral" for Ollama
+            messages = new[]
+            {
+                new { role = "user", content = prompt }
+            },
+            stream = false,
+            options = new
+            {
+                temperature = 0.1,
+                num_predict = 100  // max tokens
+            }
+        });
+
+        for (int attempt = 1; attempt <= 3; attempt++)
+        {
+            try
+            {
+                var content = new StringContent(payload, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync(
+                    "http://localhost:11434/api/chat", content);
+
+                response.EnsureSuccessStatusCode();
+                var json = await response.Content.ReadAsStringAsync();
+
+                using var doc = JsonDocument.Parse(json);
+                return doc.RootElement
+                    .GetProperty("message")
+                    .GetProperty("content")
+                    .GetString() ?? "";
+            }
+            catch (Exception ex) when (attempt < 3)
+            {
+                Console.WriteLine($"[AI] Ollama attempt {attempt} failed — {ex.Message}");
+                await Task.Delay(3000 * attempt);
+            }
+        }
+
+        throw new ScraperException("[AI] Ollama failed — is it running? Try: ollama serve");
     }
 
     // -------------------------------------------------------------------------
