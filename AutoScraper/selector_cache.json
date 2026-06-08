@@ -1,0 +1,272 @@
+{
+  "https://quotes.toscrape.com": {
+    "Elements": [
+      {
+        "Index": 3,
+        "Text": "(about)",
+        "Href": "/author/Albert-Einstein",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Albert Einstein (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/Albert-Einstein\u0027]"
+      },
+      {
+        "Index": 4,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/9810.Albert_Einstein",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Albert Einstein (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/9810.Albert_Einstein\u0027]"
+      },
+      {
+        "Index": 7,
+        "Text": "thinking",
+        "Href": "/tag/thinking/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: change deep-thoughts thinking world",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/thinking/page/1/\u0027]"
+      },
+      {
+        "Index": 10,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/1077326.J_K_Rowling",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by J.K. Rowling (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/1077326.J_K_Rowling\u0027]"
+      },
+      {
+        "Index": 14,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/9810.Albert_Einstein",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Albert Einstein (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/9810.Albert_Einstein\u0027]"
+      },
+      {
+        "Index": 21,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/1265.Jane_Austen",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Jane Austen (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/1265.Jane_Austen\u0027]"
+      },
+      {
+        "Index": 27,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/82952.Marilyn_Monroe",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Marilyn Monroe (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/82952.Marilyn_Monroe\u0027]"
+      },
+      {
+        "Index": 31,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/9810.Albert_Einstein",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Albert Einstein (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/9810.Albert_Einstein\u0027]"
+      },
+      {
+        "Index": 36,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/7617.Andr_Gide",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Andr\u00E9 Gide (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/7617.Andr_Gide\u0027]"
+      },
+      {
+        "Index": 40,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/3091287.Thomas_A_Edison",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Thomas A. Edison (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/3091287.Thomas_A_Edison\u0027]"
+      },
+      {
+        "Index": 46,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/44566.Eleanor_Roosevelt",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Eleanor Roosevelt (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/44566.Eleanor_Roosevelt\u0027]"
+      },
+      {
+        "Index": 49,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/7103.Steve_Martin",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Steve Martin (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/7103.Steve_Martin\u0027]"
+      }
+    ],
+    "CachedAt": "2026-06-08T08:39:53.9180654Z"
+  },
+  "https://quotes.toscrape.com/page/2": {
+    "Elements": [
+      {
+        "Index": 3,
+        "Text": "(about)",
+        "Href": "/author/Marilyn-Monroe",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Marilyn Monroe (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/Marilyn-Monroe\u0027]"
+      },
+      {
+        "Index": 4,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/82952.Marilyn_Monroe",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Marilyn Monroe (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/82952.Marilyn_Monroe\u0027]"
+      },
+      {
+        "Index": 7,
+        "Text": "inspirational",
+        "Href": "/tag/inspirational/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: friends heartbreak inspirational life love sisters",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/inspirational/page/1/\u0027]"
+      },
+      {
+        "Index": 11,
+        "Text": "(about)",
+        "Href": "/author/J-K-Rowling",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by J.K. Rowling (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/J-K-Rowling\u0027]"
+      },
+      {
+        "Index": 12,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/1077326.J_K_Rowling",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by J.K. Rowling (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/1077326.J_K_Rowling\u0027]"
+      },
+      {
+        "Index": 16,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/9810.Albert_Einstein",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Albert Einstein (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/9810.Albert_Einstein\u0027]"
+      },
+      {
+        "Index": 20,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/25241.Bob_Marley",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Bob Marley (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/25241.Bob_Marley\u0027]"
+      },
+      {
+        "Index": 23,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/61105.Dr_Seuss",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Dr. Seuss (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/61105.Dr_Seuss\u0027]"
+      },
+      {
+        "Index": 26,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/4.Douglas_Adams",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Douglas Adams (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/4.Douglas_Adams\u0027]"
+      },
+      {
+        "Index": 30,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/1049.Elie_Wiesel",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Elie Wiesel (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/1049.Elie_Wiesel\u0027]"
+      },
+      {
+        "Index": 40,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/1938.Friedrich_Nietzsche",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Friedrich Nietzsche (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/1938.Friedrich_Nietzsche\u0027]"
+      },
+      {
+        "Index": 48,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/1244.Mark_Twain",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Mark Twain (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/1244.Mark_Twain\u0027]"
+      },
+      {
+        "Index": 55,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/276029.Allen_Saunders",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Allen Saunders (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/276029.Allen_Saunders\u0027]"
+      },
+      {
+        "Index": 60,
+        "Text": "plans",
+        "Href": "/tag/plans/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: fate life misattributed-john-lennon planning plans",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/plans/page/1/\u0027]"
+      }
+    ],
+    "CachedAt": "2026-06-08T08:40:00.7992513Z"
+  }
+}

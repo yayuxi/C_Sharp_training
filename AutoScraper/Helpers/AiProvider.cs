@@ -8,7 +8,8 @@ public enum AiProvider
 {
     HuggingFace,
     Anthropic,
-    Ollama
+    Ollama,
+    Groq
 }
 
 /// <summary>
@@ -21,6 +22,14 @@ public class AiClient
     private readonly string _apiKey;
     private readonly AiProvider _provider;
     private readonly string _model;
+    public string ProviderName => _provider switch
+    {
+        AiProvider.HuggingFace => "Hugging Face",
+        AiProvider.Anthropic   => "Anthropic",
+        AiProvider.Ollama      => "Ollama (local)",
+        AiProvider.Groq        => "Groq",
+        _ => "Unknown"
+    };
 
     public AiClient(string apiKey, AiProvider provider = AiProvider.HuggingFace,
         string? model = null)
@@ -32,8 +41,10 @@ public class AiClient
             AiProvider.HuggingFace => "mistralai/Mistral-7B-Instruct-v0.3",
             AiProvider.Anthropic   => "claude-haiku-4-5-20251001", // fastest + cheapest
             AiProvider.Ollama      => "mistral",
+            AiProvider.Groq        => "llama-3.1-8b-instant",
             _ => throw new ArgumentOutOfRangeException(nameof(provider))
         };
+        
 
         _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
 
@@ -108,6 +119,7 @@ public class AiClient
         AiProvider.HuggingFace => CallHuggingFaceAsync(prompt),
         AiProvider.Anthropic   => CallAnthropicAsync(prompt),
         AiProvider.Ollama      => CallOllamaAsync(prompt),
+        AiProvider.Groq        => CallGroqAsync(prompt),
         _ => throw new ArgumentOutOfRangeException()
     };
 
@@ -255,6 +267,52 @@ public class AiClient
         }
 
         throw new ScraperException("[AI] Ollama failed — is it running? Try: ollama serve");
+    }
+    
+    private async Task<string> CallGroqAsync(string prompt)
+    {
+        var payload = JsonSerializer.Serialize(new
+        {
+            model = _model,
+            messages = new[]
+            {
+                new { role = "user", content = prompt }
+            },
+            max_tokens = 100,
+            temperature = 0.1
+        });
+
+        for (int attempt = 1; attempt <= 3; attempt++)
+        {
+            try
+            {
+                var request = new HttpRequestMessage(HttpMethod.Post,
+                    "https://api.groq.com/openai/v1/chat/completions");
+                request.Headers.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue(
+                        "Bearer", _apiKey);
+                request.Content = new StringContent(
+                    payload, Encoding.UTF8, "application/json");
+
+                var response = await _httpClient.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+                return doc.RootElement
+                    .GetProperty("choices")[0]
+                    .GetProperty("message")
+                    .GetProperty("content")
+                    .GetString() ?? "";
+            }
+            catch (Exception ex) when (attempt < 3)
+            {
+                Console.WriteLine($"[AI] Groq attempt {attempt} failed — {ex.Message}");
+                await Task.Delay(3000 * attempt);
+            }
+        }
+
+        throw new ScraperException("[AI] Groq API failed after 3 attempts");
     }
 
     // -------------------------------------------------------------------------

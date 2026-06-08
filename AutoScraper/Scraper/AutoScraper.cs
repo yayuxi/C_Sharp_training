@@ -102,7 +102,7 @@ public class AutoScraper
 
         try
         {
-            Console.WriteLine("[AutoScraper] Querying Hugging Face model...");
+            Console.WriteLine($"[AutoScraper] Querying {_ai.ProviderName} model...");
             var found = await _ai.FindDocumentElementsAsync(candidates, goal);
 
             if (found.Count > 0)

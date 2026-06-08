@@ -28,8 +28,8 @@ class Program
         const bool useAutoScraper = true;
 
         // ↓ Hugging Face API key — only needed if useAutoScraper is true
-        const AiProvider aiProvider = AiProvider.Ollama;
-        const string huggingFaceApiKey = "";
+        const AiProvider aiProvider = AiProvider.Groq;
+        const string aiApiKey ;
 
         // ↓ Describe what you're looking for — the AI uses this as its goal
         const string scrapingGoal = "quotes and author names";
@@ -69,8 +69,8 @@ class Program
             // Step 2: scrape using either auto or manual scraper
             if (useAutoScraper)
             {
-                var autoScraper = new AutoScraper(page, huggingFaceApiKey);
-                var documents = await autoScraper.ScrapeDocumentsAsync(targetUrl, scrapingGoal);
+                var autoScraper = new AutoScraper(page, aiApiKey, aiProvider);
+                var documents = await autoScraper.ScrapeDocumentsAsync("https://quotes.toscrape.com", scrapingGoal);
                 CsvExporter.Export(documents, "auto_documents.csv");
                 Console.WriteLine($"[Done] Saved {documents.Count} documents to auto_documents.csv");
             }
