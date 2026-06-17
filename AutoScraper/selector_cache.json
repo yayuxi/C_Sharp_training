@@ -122,7 +122,8 @@
         "Selector": "a[href=\u0027http://goodreads.com/author/show/7103.Steve_Martin\u0027]"
       }
     ],
-    "CachedAt": "2026-06-08T08:39:53.9180654Z"
+    "LastUpdated": "2026-06-17T11:18:43.3669678Z",
+    "TotalDiscovered": 0
   },
   "https://quotes.toscrape.com/page/2": {
     "Elements": [
@@ -267,6 +268,651 @@
         "Selector": "a[href=\u0027/tag/plans/page/1/\u0027]"
       }
     ],
-    "CachedAt": "2026-06-08T08:40:00.7992513Z"
+    "LastUpdated": "2026-06-17T11:19:01.3740181Z",
+    "TotalDiscovered": 0
+  },
+  "https://quotes.toscrape.com/page/3": {
+    "Elements": [
+      {
+        "Index": 3,
+        "Text": "(about)",
+        "Href": "/author/Pablo-Neruda",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Pablo Neruda (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/Pablo-Neruda\u0027]"
+      },
+      {
+        "Index": 4,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/4026.Pablo_Neruda",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Pablo Neruda (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/4026.Pablo_Neruda\u0027]"
+      },
+      {
+        "Index": 7,
+        "Text": "(about)",
+        "Href": "/author/Ralph-Waldo-Emerson",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Ralph Waldo Emerson (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/Ralph-Waldo-Emerson\u0027]"
+      },
+      {
+        "Index": 8,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/12080.Ralph_Waldo_Emerson",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Ralph Waldo Emerson (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/12080.Ralph_Waldo_Emerson\u0027]"
+      },
+      {
+        "Index": 10,
+        "Text": "(about)",
+        "Href": "/author/Mother-Teresa",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Mother Teresa (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/Mother-Teresa\u0027]"
+      },
+      {
+        "Index": 11,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/838305.Mother_Teresa",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Mother Teresa (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/838305.Mother_Teresa\u0027]"
+      },
+      {
+        "Index": 13,
+        "Text": "(about)",
+        "Href": "/author/Garrison-Keillor",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Garrison Keillor (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/Garrison-Keillor\u0027]"
+      },
+      {
+        "Index": 14,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/2014.Garrison_Keillor",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Garrison Keillor (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/2014.Garrison_Keillor\u0027]"
+      },
+      {
+        "Index": 17,
+        "Text": "(about)",
+        "Href": "/author/Jim-Henson",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Jim Henson (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/Jim-Henson\u0027]"
+      },
+      {
+        "Index": 18,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/4427.Jim_Henson",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Jim Henson (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/4427.Jim_Henson\u0027]"
+      },
+      {
+        "Index": 20,
+        "Text": "(about)",
+        "Href": "/author/Dr-Seuss",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Dr. Seuss (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/Dr-Seuss\u0027]"
+      },
+      {
+        "Index": 21,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/61105.Dr_Seuss",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Dr. Seuss (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/61105.Dr_Seuss\u0027]"
+      },
+      {
+        "Index": 25,
+        "Text": "(about)",
+        "Href": "/author/Albert-Einstein",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Albert Einstein (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/Albert-Einstein\u0027]"
+      },
+      {
+        "Index": 26,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/9810.Albert_Einstein",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Albert Einstein (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/9810.Albert_Einstein\u0027]"
+      },
+      {
+        "Index": 29,
+        "Text": "(about)",
+        "Href": "/author/J-K-Rowling",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by J.K. Rowling (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/J-K-Rowling\u0027]"
+      },
+      {
+        "Index": 30,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/1077326.J_K_Rowling",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by J.K. Rowling (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/1077326.J_K_Rowling\u0027]"
+      },
+      {
+        "Index": 31,
+        "Text": "(about)",
+        "Href": "/author/Albert-Einstein",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Albert Einstein (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/Albert-Einstein\u0027]"
+      },
+      {
+        "Index": 32,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/9810.Albert_Einstein",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Albert Einstein (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/9810.Albert_Einstein\u0027]"
+      },
+      {
+        "Index": 34,
+        "Text": "(about)",
+        "Href": "/author/Bob-Marley",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Bob Marley (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/Bob-Marley\u0027]"
+      },
+      {
+        "Index": 35,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/25241.Bob_Marley",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Bob Marley (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/25241.Bob_Marley\u0027]"
+      }
+    ],
+    "LastUpdated": "2026-06-17T11:19:27.3699061Z",
+    "TotalDiscovered": 0
+  },
+  "https://quotes.toscrape.com__guidelines": {
+    "Elements": [
+      {
+        "Index": 1,
+        "Text": "Quotes to Scrape",
+        "Href": "/",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "Quotes to Scrape",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/\u0027]"
+      },
+      {
+        "Index": 4,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/9810.Albert_Einstein",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Albert Einstein (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/9810.Albert_Einstein\u0027]"
+      },
+      {
+        "Index": 7,
+        "Text": "thinking",
+        "Href": "/tag/thinking/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: change deep-thoughts thinking world",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/thinking/page/1/\u0027]"
+      },
+      {
+        "Index": 54,
+        "Text": "love",
+        "Href": "/tag/love/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "love",
+        "ParentClass": "tag-item",
+        "Selector": "a[href=\u0027/tag/love/\u0027]"
+      },
+      {
+        "Index": 55,
+        "Text": "inspirational",
+        "Href": "/tag/inspirational/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "inspirational",
+        "ParentClass": "tag-item",
+        "Selector": "a[href=\u0027/tag/inspirational/\u0027]"
+      },
+      {
+        "Index": 56,
+        "Text": "life",
+        "Href": "/tag/life/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "life",
+        "ParentClass": "tag-item",
+        "Selector": "a[href=\u0027/tag/life/\u0027]"
+      },
+      {
+        "Index": 57,
+        "Text": "humor",
+        "Href": "/tag/humor/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "humor",
+        "ParentClass": "tag-item",
+        "Selector": "a[href=\u0027/tag/humor/\u0027]"
+      },
+      {
+        "Index": 58,
+        "Text": "books",
+        "Href": "/tag/books/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "books",
+        "ParentClass": "tag-item",
+        "Selector": "a[href=\u0027/tag/books/\u0027]"
+      },
+      {
+        "Index": 59,
+        "Text": "reading",
+        "Href": "/tag/reading/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "reading",
+        "ParentClass": "tag-item",
+        "Selector": "a[href=\u0027/tag/reading/\u0027]"
+      },
+      {
+        "Index": 60,
+        "Text": "friendship",
+        "Href": "/tag/friendship/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "friendship",
+        "ParentClass": "tag-item",
+        "Selector": "a[href=\u0027/tag/friendship/\u0027]"
+      },
+      {
+        "Index": 61,
+        "Text": "friends",
+        "Href": "/tag/friends/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "friends",
+        "ParentClass": "tag-item",
+        "Selector": "a[href=\u0027/tag/friends/\u0027]"
+      },
+      {
+        "Index": 62,
+        "Text": "truth",
+        "Href": "/tag/truth/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "truth",
+        "ParentClass": "tag-item",
+        "Selector": "a[href=\u0027/tag/truth/\u0027]"
+      },
+      {
+        "Index": 63,
+        "Text": "simile",
+        "Href": "/tag/simile/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "simile",
+        "ParentClass": "tag-item",
+        "Selector": "a[href=\u0027/tag/simile/\u0027]"
+      },
+      {
+        "Index": 64,
+        "Text": "GoodReads.com",
+        "Href": "https://www.goodreads.com/quotes",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "Quotes by: GoodReads.com",
+        "ParentClass": "text-muted",
+        "Selector": "a[href=\u0027https://www.goodreads.com/quotes\u0027]"
+      }
+    ],
+    "LastUpdated": "2026-06-17T12:13:00.3837303Z",
+    "TotalDiscovered": 14
+  },
+  "https://quotes.toscrape.com__documents": {
+    "Elements": [
+      {
+        "Index": 3,
+        "Text": "(about)",
+        "Href": "/author/Albert-Einstein",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Albert Einstein (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/Albert-Einstein\u0027]"
+      },
+      {
+        "Index": 4,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/9810.Albert_Einstein",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Albert Einstein (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/9810.Albert_Einstein\u0027]"
+      },
+      {
+        "Index": 7,
+        "Text": "thinking",
+        "Href": "/tag/thinking/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: change deep-thoughts thinking world",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/thinking/page/1/\u0027]"
+      },
+      {
+        "Index": 10,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/1077326.J_K_Rowling",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by J.K. Rowling (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/1077326.J_K_Rowling\u0027]"
+      },
+      {
+        "Index": 14,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/9810.Albert_Einstein",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Albert Einstein (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/9810.Albert_Einstein\u0027]"
+      },
+      {
+        "Index": 21,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/1265.Jane_Austen",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Jane Austen (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/1265.Jane_Austen\u0027]"
+      },
+      {
+        "Index": 31,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/9810.Albert_Einstein",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Albert Einstein (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/9810.Albert_Einstein\u0027]"
+      },
+      {
+        "Index": 46,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/44566.Eleanor_Roosevelt",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Eleanor Roosevelt (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/44566.Eleanor_Roosevelt\u0027]"
+      },
+      {
+        "Index": 64,
+        "Text": "GoodReads.com",
+        "Href": "https://www.goodreads.com/quotes",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "Quotes by: GoodReads.com",
+        "ParentClass": "text-muted",
+        "Selector": "a[href=\u0027https://www.goodreads.com/quotes\u0027]"
+      }
+    ],
+    "LastUpdated": "2026-06-17T12:13:00.9347096Z",
+    "TotalDiscovered": 9
+  },
+  "https://quotes.toscrape.com/page/2/__documents": {
+    "Elements": [
+      {
+        "Index": 3,
+        "Text": "(about)",
+        "Href": "/author/Marilyn-Monroe",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Marilyn Monroe (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/Marilyn-Monroe\u0027]"
+      },
+      {
+        "Index": 4,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/82952.Marilyn_Monroe",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Marilyn Monroe (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/82952.Marilyn_Monroe\u0027]"
+      },
+      {
+        "Index": 7,
+        "Text": "inspirational",
+        "Href": "/tag/inspirational/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: friends heartbreak inspirational life love sisters",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/inspirational/page/1/\u0027]"
+      },
+      {
+        "Index": 13,
+        "Text": "courage",
+        "Href": "/tag/courage/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: courage friends",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/courage/page/1/\u0027]"
+      },
+      {
+        "Index": 21,
+        "Text": "love",
+        "Href": "/tag/love/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: love",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/love/page/1/\u0027]"
+      },
+      {
+        "Index": 27,
+        "Text": "life",
+        "Href": "/tag/life/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: life navigation",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/life/page/1/\u0027]"
+      },
+      {
+        "Index": 33,
+        "Text": "hate",
+        "Href": "/tag/hate/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: activism apathy hate indifference inspirational love o",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/hate/page/1/\u0027]"
+      },
+      {
+        "Index": 36,
+        "Text": "love",
+        "Href": "/tag/love/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: activism apathy hate indifference inspirational love o",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/love/page/1/\u0027]"
+      },
+      {
+        "Index": 40,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/1938.Friedrich_Nietzsche",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Friedrich Nietzsche (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/1938.Friedrich_Nietzsche\u0027]"
+      },
+      {
+        "Index": 43,
+        "Text": "lack-of-love",
+        "Href": "/tag/lack-of-love/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: friendship lack-of-friendship lack-of-love love marria",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/lack-of-love/page/1/\u0027]"
+      },
+      {
+        "Index": 46,
+        "Text": "unhappy-marriage",
+        "Href": "/tag/unhappy-marriage/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: friendship lack-of-friendship lack-of-love love marria",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/unhappy-marriage/page/1/\u0027]"
+      },
+      {
+        "Index": 53,
+        "Text": "life",
+        "Href": "/tag/life/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: books contentment friends friendship life",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/life/page/1/\u0027]"
+      },
+      {
+        "Index": 57,
+        "Text": "life",
+        "Href": "/tag/life/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: fate life misattributed-john-lennon planning plans",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/life/page/1/\u0027]"
+      },
+      {
+        "Index": 63,
+        "Text": "love",
+        "Href": "/tag/love/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "love",
+        "ParentClass": "tag-item",
+        "Selector": "a[href=\u0027/tag/love/\u0027]"
+      },
+      {
+        "Index": 65,
+        "Text": "life",
+        "Href": "/tag/life/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "life",
+        "ParentClass": "tag-item",
+        "Selector": "a[href=\u0027/tag/life/\u0027]"
+      },
+      {
+        "Index": 67,
+        "Text": "books",
+        "Href": "/tag/books/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "books",
+        "ParentClass": "tag-item",
+        "Selector": "a[href=\u0027/tag/books/\u0027]"
+      },
+      {
+        "Index": 69,
+        "Text": "friendship",
+        "Href": "/tag/friendship/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "friendship",
+        "ParentClass": "tag-item",
+        "Selector": "a[href=\u0027/tag/friendship/\u0027]"
+      },
+      {
+        "Index": 70,
+        "Text": "friends",
+        "Href": "/tag/friends/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "friends",
+        "ParentClass": "tag-item",
+        "Selector": "a[href=\u0027/tag/friends/\u0027]"
+      },
+      {
+        "Index": 73,
+        "Text": "GoodReads.com",
+        "Href": "https://www.goodreads.com/quotes",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "Quotes by: GoodReads.com",
+        "ParentClass": "text-muted",
+        "Selector": "a[href=\u0027https://www.goodreads.com/quotes\u0027]"
+      }
+    ],
+    "LastUpdated": "2026-06-17T12:13:27.056318Z",
+    "TotalDiscovered": 19
   }
 }

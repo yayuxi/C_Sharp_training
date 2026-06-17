@@ -1,0 +1,29 @@
+GuidelineCode,DocumentTitle,DocumentUrl,DocumentType,FileFormat
+,(about),https://quotes.toscrape.com/author/Albert-Einstein,Document,HTML
+,(Goodreads page),http://goodreads.com/author/show/9810.Albert_Einstein,Document,ALBERT_EINSTEIN
+,thinking,https://quotes.toscrape.com/tag/thinking/page/1/,Document,HTML
+,(Goodreads page),http://goodreads.com/author/show/1077326.J_K_Rowling,Document,J_K_ROWLING
+,(Goodreads page),http://goodreads.com/author/show/9810.Albert_Einstein,Document,ALBERT_EINSTEIN
+,(Goodreads page),http://goodreads.com/author/show/1265.Jane_Austen,Document,JANE_AUSTEN
+,(Goodreads page),http://goodreads.com/author/show/9810.Albert_Einstein,Document,ALBERT_EINSTEIN
+,(Goodreads page),http://goodreads.com/author/show/44566.Eleanor_Roosevelt,Document,ELEANOR_ROOSEVELT
+,GoodReads.com,https://www.goodreads.com/quotes,Document,HTML
+,(about),https://quotes.toscrape.com/author/Marilyn-Monroe,Document,HTML
+,(Goodreads page),http://goodreads.com/author/show/82952.Marilyn_Monroe,Document,MARILYN_MONROE
+,inspirational,https://quotes.toscrape.com/tag/inspirational/page/1/,Document,HTML
+,courage,https://quotes.toscrape.com/tag/courage/page/1/,Document,HTML
+,love,https://quotes.toscrape.com/tag/love/page/1/,Document,HTML
+,life,https://quotes.toscrape.com/tag/life/page/1/,Document,HTML
+,hate,https://quotes.toscrape.com/tag/hate/page/1/,Document,HTML
+,love,https://quotes.toscrape.com/tag/love/page/1/,Document,HTML
+,(Goodreads page),http://goodreads.com/author/show/1938.Friedrich_Nietzsche,Document,FRIEDRICH_NIETZSCHE
+,lack-of-love,https://quotes.toscrape.com/tag/lack-of-love/page/1/,Document,HTML
+,unhappy-marriage,https://quotes.toscrape.com/tag/unhappy-marriage/page/1/,Document,HTML
+,life,https://quotes.toscrape.com/tag/life/page/1/,Document,HTML
+,life,https://quotes.toscrape.com/tag/life/page/1/,Document,HTML
+,love,https://quotes.toscrape.com/tag/love/,Document,HTML
+,life,https://quotes.toscrape.com/tag/life/,Document,HTML
+,books,https://quotes.toscrape.com/tag/books/,Document,HTML
+,friendship,https://quotes.toscrape.com/tag/friendship/,Document,HTML
+,friends,https://quotes.toscrape.com/tag/friends/,Document,HTML
+,GoodReads.com,https://www.goodreads.com/quotes,Document,HTML

@@ -29,7 +29,7 @@ class Program
 
         // ↓ Hugging Face API key — only needed if useAutoScraper is true
         const AiProvider aiProvider = AiProvider.Groq;
-        const string aiApiKey ;
+        const string aiApiKey = "";
 
         // ↓ Describe what you're looking for — the AI uses this as its goal
         const string scrapingGoal = "quotes and author names";
@@ -70,9 +70,17 @@ class Program
             if (useAutoScraper)
             {
                 var autoScraper = new AutoScraper(page, aiApiKey, aiProvider);
-                var documents = await autoScraper.ScrapeDocumentsAsync("https://quotes.toscrape.com", scrapingGoal);
+
+                var (guidelines, documents) = await autoScraper.ScrapeAsync(
+                    url: "https://quotes.toscrape.com",
+                    guidelineGoal: "quotes, titles, or main content items",
+                    documentGoal: "PDF files, downloadable documents, or file links");
+
+                CsvExporter.Export(guidelines, "auto_guidelines.csv");
                 CsvExporter.Export(documents, "auto_documents.csv");
-                Console.WriteLine($"[Done] Saved {documents.Count} documents to auto_documents.csv");
+
+                Console.WriteLine($"[Done] {guidelines.Count} guidelines, " +
+                                  $"{documents.Count} documents saved");
             }
             else
             {
