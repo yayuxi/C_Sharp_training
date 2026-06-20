@@ -20,18 +20,18 @@ public class AutoScraper
     {
         _page = page;
         _ai = new AiClient(apiKey, provider);
-        _cache = new SelectorCache();
+        _cache = new SelectorCache("selector_cache.json");
         _extractor = new PageElementExtractor(page);
     }
 
     /// <summary>
-    /// Main entry point — navigates to the URL, finds documents using AI,
-    /// handles pagination, and returns all found document elements.
+    /// Scrapes both guidelines and documents from the target URL.
+    /// Uses cached selectors immediately and expands the cache via AI on each run.
     /// </summary>
-    public async Task<List<GuidelineDocument>> ScrapeDocumentsAsync(
-        string url,
-        string goal = "regulatory documents, guidelines, or PDF files")
+    public async Task<(List<Guideline> Guidelines, List<GuidelineDocument> Documents)>
+        ScrapeAsync(string url, string guidelineGoal, string documentGoal)
     {
+        var allGuidelines = new List<Guideline>();
         var allDocuments = new List<GuidelineDocument>();
         var currentUrl = url;
         int pageNumber = 1;
@@ -49,25 +49,53 @@ public class AutoScraper
             var candidates = await _extractor.ExtractCandidatesAsync();
             Console.WriteLine($"[AutoScraper] Found {candidates.Count} candidate elements");
 
-            // Get document elements — from cache or AI
-            var documentElements = await GetDocumentElementsAsync(currentUrl, candidates, goal);
-            Console.WriteLine($"[AutoScraper] Identified {documentElements.Count} document elements");
+            // Use two separate cache keys — one for guidelines, one for documents
+            var guidelineCacheKey = $"{currentUrl}__guidelines";
+            var documentCacheKey = $"{currentUrl}__documents";
 
-            // Convert to GuidelineDocument records
-            var pageDocs = documentElements.Select(e => new GuidelineDocument
+            // Report what's already cached
+            var cachedGuidelines = _cache.GetCachedCount(guidelineCacheKey);
+            var cachedDocuments = _cache.GetCachedCount(documentCacheKey);
+            Console.WriteLine($"[AutoScraper] Cache status — " +
+                              $"guidelines: {cachedGuidelines}, documents: {cachedDocuments}");
+
+            // Try to expand both caches via AI
+            await TryExpandCacheAsync(guidelineCacheKey, candidates, guidelineGoal, "guidelines");
+            await TryExpandCacheAsync(documentCacheKey, candidates, documentGoal, "documents");
+
+            // Scrape guidelines from cache
+            if (_cache.TryGet(guidelineCacheKey, out var guidelineElements))
             {
-                GuidelineCode = "",  // unknown without deeper context
-                DocumentTitle = e.Text,
-                DocumentUrl = e.Href.StartsWith("http")
-                    ? e.Href
-                    : $"{new Uri(currentUrl).GetLeftPart(UriPartial.Authority)}{e.Href}",
-                DocumentType = InferDocumentType(e),
-                FileFormat = InferFileFormat(e)
-            }).ToList();
+                var pageGuidelines = await ExtractGuidelinesFromSelectorsAsync(
+                    guidelineElements, currentUrl);
+                allGuidelines.AddRange(pageGuidelines);
+                Console.WriteLine($"[AutoScraper] Page {pageNumber}: " +
+                                  $"{pageGuidelines.Count} guidelines scraped");
+            }
+            else
+            {
+                Console.WriteLine("[AutoScraper] No guideline selectors cached yet " +
+                                  "— run again to accumulate more");
+            }
 
-            allDocuments.AddRange(pageDocs);
-            Console.WriteLine($"[AutoScraper] Page {pageNumber}: {pageDocs.Count} documents — " +
-                              $"Total: {allDocuments.Count}");
+            // Scrape documents from cache
+            if (_cache.TryGet(documentCacheKey, out var documentElements))
+            {
+                var pageDocs = await ExtractDocumentsFromSelectorsAsync(
+                    documentElements, currentUrl);
+                allDocuments.AddRange(pageDocs);
+                Console.WriteLine($"[AutoScraper] Page {pageNumber}: " +
+                                  $"{pageDocs.Count} documents scraped");
+            }
+            else
+            {
+                Console.WriteLine("[AutoScraper] No document selectors cached yet " +
+                                  "— run again to accumulate more");
+            }
+
+            Console.WriteLine($"[AutoScraper] Running totals — " +
+                              $"guidelines: {allGuidelines.Count}, " +
+                              $"documents: {allDocuments.Count}");
 
             // Check for next page
             var nextPage = await TryFindNextPageAsync(candidates, currentUrl);
@@ -83,70 +111,144 @@ public class AutoScraper
             pageNumber++;
         }
 
-        return allDocuments;
+        return (allGuidelines, allDocuments);
     }
 
-    private async Task<List<ElementSummary>> GetDocumentElementsAsync(
-        string url,
+    // -------------------------------------------------------------------------
+    // Cache expansion
+    // -------------------------------------------------------------------------
+
+    private async Task TryExpandCacheAsync(
+        string cacheKey,
         List<ElementSummary> candidates,
-        string goal)
+        string goal,
+        string label)
     {
-        if (_cache.TryGet(url, out var cached))
-        {
-            if (await ValidateCachedSelectorsAsync(cached))
-                return cached;
-
-            Console.WriteLine("[AutoScraper] Cached selectors invalid — re-querying AI");
-            _cache.Invalidate(url);
-        }
-
         try
         {
-            Console.WriteLine($"[AutoScraper] Querying {_ai.ProviderName} model...");
+            Console.WriteLine($"[AutoScraper] Querying {_ai.ProviderName} for {label}...");
             var found = await _ai.FindDocumentElementsAsync(candidates, goal);
 
             if (found.Count > 0)
-                _cache.Set(url, found);
-
-            return found;
+                _cache.Merge(cacheKey, found);
+            else
+                Console.WriteLine($"[AutoScraper] AI found no new {label} elements");
         }
-        catch (ScraperException ex)
+        catch (HttpRequestException ex) when (ex.Message.Contains("429"))
         {
-            // AI unavailable — fall back to returning all candidates
-            // so the scraper still produces something useful
-            Console.WriteLine($"[AutoScraper] AI query failed — {ex.Message}");
-            Console.WriteLine("[AutoScraper] Falling back to returning all candidates");
-            return candidates;
+            Console.WriteLine($"[AutoScraper] Rate limited on {label} query — " +
+                              $"using {_cache.GetCachedCount(cacheKey)} cached selectors");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[AutoScraper] AI error for {label} — {ex.Message}");
         }
     }
 
-    /// <summary>
-    /// Checks that at least one cached selector still finds an element on the page.
-    /// If the site restructured, selectors will be stale.
-    /// </summary>
-    private async Task<bool> ValidateCachedSelectorsAsync(List<ElementSummary> cached)
+    // -------------------------------------------------------------------------
+    // Extraction from cached selectors
+    // -------------------------------------------------------------------------
+
+    private async Task<List<Guideline>> ExtractGuidelinesFromSelectorsAsync(
+        List<ElementSummary> cachedElements, string currentUrl)
     {
-        foreach (var item in cached.Take(3)) // check first 3 as a sample
+        var guidelines = new List<Guideline>();
+
+        foreach (var cached in cachedElements)
         {
-            var element = await _page.QuerySelectorAsync(item.Selector);
-            if (element != null && await element.IsVisibleAsync())
-                return true;
+            try
+            {
+                var element = await _page.QuerySelectorAsync(cached.Selector);
+                if (element == null || !await element.IsVisibleAsync()) continue;
+
+                var text = (await element.InnerTextAsync()).Trim();
+                var href = await element.GetAttributeAsync("href") ?? cached.Href;
+
+                if (string.IsNullOrWhiteSpace(text)) continue;
+
+                var sourceUrl = href.StartsWith("http")
+                    ? href
+                    : $"{new Uri(currentUrl).GetLeftPart(UriPartial.Authority)}{href}";
+
+                guidelines.Add(new Guideline
+                {
+                    GuidelineCode = "",   // AI can't reliably extract these
+                    Title = text,         // from a simple element summary —
+                    Category = "",        // for full field extraction the manual
+                    Step = "",            // scraper is still needed
+                    Status = "",
+                    Dated = DateTime.MinValue,
+                    Summary = "",
+                    SourceUrl = sourceUrl
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(
+                    $"[AutoScraper] Guideline selector failed: {cached.Selector} — {ex.Message}");
+            }
         }
-        return false;
+
+        return guidelines;
     }
 
-    private static string InferDocumentType(ElementSummary element)
+    private async Task<List<GuidelineDocument>> ExtractDocumentsFromSelectorsAsync(
+        List<ElementSummary> cachedElements, string currentUrl)
     {
-        if (element.CssClass.Contains("pdf")) return "PDF Document";
-        if (element.Href.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)) return "PDF Document";
-        if (element.CssClass.Contains("link")) return "Web Page";
+        var documents = new List<GuidelineDocument>();
+
+        foreach (var cached in cachedElements)
+        {
+            try
+            {
+                var element = await _page.QuerySelectorAsync(cached.Selector);
+                if (element == null || !await element.IsVisibleAsync()) continue;
+
+                var text = (await element.InnerTextAsync()).Trim();
+                var href = await element.GetAttributeAsync("href") ?? cached.Href;
+                var cssClass = await element.GetAttributeAsync("class") ?? cached.CssClass;
+
+                if (string.IsNullOrWhiteSpace(href)) continue;
+
+                var docUrl = href.StartsWith("http")
+                    ? href
+                    : $"{new Uri(currentUrl).GetLeftPart(UriPartial.Authority)}{href}";
+
+                documents.Add(new GuidelineDocument
+                {
+                    GuidelineCode = "",
+                    DocumentTitle = text,
+                    DocumentUrl = docUrl,
+                    DocumentType = InferDocumentType(cssClass, href),
+                    FileFormat = InferFileFormat(cssClass, href)
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(
+                    $"[AutoScraper] Document selector failed: {cached.Selector} — {ex.Message}");
+            }
+        }
+
+        return documents;
+    }
+
+    // -------------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------------
+
+    private static string InferDocumentType(string cssClass, string href)
+    {
+        if (cssClass.Contains("pdf")) return "PDF Document";
+        if (href.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)) return "PDF Document";
+        if (cssClass.Contains("link")) return "Web Page";
         return "Document";
     }
 
-    private static string InferFileFormat(ElementSummary element)
+    private static string InferFileFormat(string cssClass, string href)
     {
-        if (element.CssClass.Contains("pdf")) return "PDF";
-        var ext = Path.GetExtension(element.Href).TrimStart('.').ToUpper();
+        if (cssClass.Contains("pdf")) return "PDF";
+        var ext = Path.GetExtension(href).TrimStart('.').ToUpper();
         return string.IsNullOrWhiteSpace(ext) ? "HTML" : ext;
     }
     
