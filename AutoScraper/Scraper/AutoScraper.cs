@@ -70,7 +70,7 @@ public class AutoScraper
                               $"Total: {allDocuments.Count}");
 
             // Check for next page
-            var nextPage = await _ai.FindNextPageElementAsync(candidates);
+            var nextPage = await TryFindNextPageAsync(candidates, currentUrl);
             if (nextPage == null || string.IsNullOrWhiteSpace(nextPage.Href))
             {
                 Console.WriteLine("[AutoScraper] No next page found — scrape complete");
@@ -148,5 +148,40 @@ public class AutoScraper
         if (element.CssClass.Contains("pdf")) return "PDF";
         var ext = Path.GetExtension(element.Href).TrimStart('.').ToUpper();
         return string.IsNullOrWhiteSpace(ext) ? "HTML" : ext;
+    }
+    
+    private async Task<ElementSummary?> TryFindNextPageAsync(
+        List<ElementSummary> candidates, string currentUrl)
+    {
+        try
+        {
+            var baseHost = new Uri(currentUrl).Host;
+
+            var nextPage = await _ai.FindNextPageElementAsync(candidates);
+            if (nextPage == null) return null;
+
+            // Reject if the link leads to a different domain
+            if (!string.IsNullOrWhiteSpace(nextPage.Href))
+            {
+                try
+                {
+                    var nextHost = new Uri(nextPage.Href).Host;
+                    if (nextHost != baseHost && !string.IsNullOrWhiteSpace(nextHost))
+                    {
+                        Console.WriteLine($"[AutoScraper] Rejected next page link — " +
+                                          $"points to external domain: {nextHost}");
+                        return null;
+                    }
+                }
+                catch { /* relative URL — safe to use */ }
+            }
+
+            return nextPage;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[AutoScraper] Could not determine next page — {ex.Message}");
+            return null;
+        }
     }
 }

@@ -26,7 +26,7 @@ public class AiClient
     {
         AiProvider.HuggingFace => "Hugging Face",
         AiProvider.Anthropic   => "Anthropic",
-        AiProvider.Ollama      => "Ollama (local)",
+        AiProvider.Ollama      => "mistral:7b-instruct-q4_0",
         AiProvider.Groq        => "Groq",
         _ => "Unknown"
     };
@@ -40,7 +40,7 @@ public class AiClient
         {
             AiProvider.HuggingFace => "mistralai/Mistral-7B-Instruct-v0.3",
             AiProvider.Anthropic   => "claude-haiku-4-5-20251001", // fastest + cheapest
-            AiProvider.Ollama      => "mistral",
+            AiProvider.Ollama      => "mistral:7b-instruct-q4_0",
             AiProvider.Groq        => "llama-3.1-8b-instant",
             _ => throw new ArgumentOutOfRangeException(nameof(provider))
         };
@@ -91,16 +91,22 @@ public class AiClient
 
         var elementList = string.Join("\n", candidates.Select(c => c.ToString()));
         var prompt = $"""
-            You are helping a web scraper navigate pagination.
-            
-            Here are the elements found on the page:
-            {elementList}
-            
-            Return ONLY the index number of the "next page" or pagination button.
-            Example response: 12
-            If there is no next page button, return: -1
-            Return nothing else — no explanation, no markdown, just the number.
-            """;
+                      You are helping a web scraper find pagination controls.
+
+                      Here are the elements found on the page:
+                      {elementList}
+
+                      Find the "next page" pagination button or link. It should:
+                      - Have text like "Next", "→", "»", or a page number
+                      - Be a navigation control, NOT a content link
+                      - Stay on the same website (not link to external sites like Goodreads, Amazon etc.)
+                      - NOT be an author name, book title, tag, or any content element
+
+                      Return ONLY the index number of the next page control.
+                      Example response: 12
+                      If there is no next page button, return: -1
+                      Return nothing else — no explanation, no markdown, just the number.
+                      """;
 
         var response = await CallApiAsync(prompt);
 

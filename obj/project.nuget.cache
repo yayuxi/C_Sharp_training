@@ -1,8 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "AbIZd2iYvEY=",
+  "dgSpecHash": "jsZYYQ0Cix8=",
   "success": true,
-  "projectFilePath": "C:\\Users\\elias\\RiderProjects\\træning\\træning.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "C:\\Users\\Ejer\\RiderProjects\\C_Sharp_training\\træning.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Ejer\\.nuget\\packages\\csvhelper\\33.1.0\\csvhelper.33.1.0.nupkg.sha512",
+    "C:\\Users\\Ejer\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\6.0.0\\microsoft.bcl.asyncinterfaces.6.0.0.nupkg.sha512",
+    "C:\\Users\\Ejer\\.nuget\\packages\\microsoft.playwright\\1.60.0\\microsoft.playwright.1.60.0.nupkg.sha512",
+    "C:\\Users\\Ejer\\.nuget\\packages\\system.componentmodel.annotations\\5.0.0\\system.componentmodel.annotations.5.0.0.nupkg.sha512"
+  ],
   "logs": []
 }

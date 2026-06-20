@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Bruger 1\\RiderProjects\\C_Sharp_training\\ICHScraper\\ICHScraper.csproj": {}
+    "C:\\Users\\Ejer\\RiderProjects\\C_Sharp_training\\ICHScraper\\ICHScraper.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Bruger 1\\RiderProjects\\C_Sharp_training\\ICHScraper\\ICHScraper.csproj": {
+    "C:\\Users\\Ejer\\RiderProjects\\C_Sharp_training\\ICHScraper\\ICHScraper.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Bruger 1\\RiderProjects\\C_Sharp_training\\ICHScraper\\ICHScraper.csproj",
+        "projectUniqueName": "C:\\Users\\Ejer\\RiderProjects\\C_Sharp_training\\ICHScraper\\ICHScraper.csproj",
         "projectName": "ICHScraper",
-        "projectPath": "C:\\Users\\Bruger 1\\RiderProjects\\C_Sharp_training\\ICHScraper\\ICHScraper.csproj",
-        "packagesPath": "C:\\Users\\Bruger 1\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Bruger 1\\RiderProjects\\C_Sharp_training\\ICHScraper\\obj\\",
+        "projectPath": "C:\\Users\\Ejer\\RiderProjects\\C_Sharp_training\\ICHScraper\\ICHScraper.csproj",
+        "packagesPath": "C:\\Users\\Ejer\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Ejer\\RiderProjects\\C_Sharp_training\\ICHScraper\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Bruger 1\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\Ejer\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net10.0"
@@ -38,7 +38,7 @@
           "auditLevel": "low",
           "auditMode": "all"
         },
-        "SdkAnalysisLevel": "10.0.200"
+        "SdkAnalysisLevel": "10.0.300"
       },
       "frameworks": {
         "net10.0": {
@@ -69,7 +69,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.203/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Users\\Ejer\\.dotnet\\sdk\\10.0.301/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.CSharp": "(,4.7.32767]",
             "Microsoft.VisualBasic": "(,10.4.32767]",

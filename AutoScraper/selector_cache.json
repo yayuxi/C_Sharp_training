@@ -268,5 +268,40 @@
       }
     ],
     "CachedAt": "2026-06-08T08:40:00.7992513Z"
+  },
+  "https://www.goodreads.com/quotes": {
+    "Elements": [
+      {
+        "Index": 1,
+        "Text": "Friends",
+        "Href": "/quotes/friend_quotes",
+        "CssClass": " tab",
+        "TagName": "a",
+        "ParentText": "Popular",
+        "ParentClass": "tabs mediumTabs",
+        "Selector": "a[href=\u0027/quotes/friend_quotes\u0027]"
+      },
+      {
+        "Index": 4,
+        "Text": "178305 likes",
+        "Href": "/quotes/19884-be-yourself-everyone-else-is-already-taken",
+        "CssClass": "smallText",
+        "TagName": "a",
+        "ParentText": "178305 likes",
+        "ParentClass": "right",
+        "Selector": "a[href=\u0027/quotes/19884-be-yourself-everyone-else-is-already-taken\u0027]"
+      },
+      {
+        "Index": 7,
+        "Text": "attributed-no-source",
+        "Href": "/quotes/tag/attributed-no-source",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "tags: attributed-no-source, best, life, love, misattributed-",
+        "ParentClass": "greyText smallText left",
+        "Selector": "a[href=\u0027/quotes/tag/attributed-no-source\u0027]"
+      }
+    ],
+    "CachedAt": "2026-06-20T18:15:37.1627353Z"
   }
 }
