@@ -122,7 +122,8 @@
         "Selector": "a[href=\u0027http://goodreads.com/author/show/7103.Steve_Martin\u0027]"
       }
     ],
-    "CachedAt": "2026-06-08T08:39:53.9180654Z"
+    "LastUpdated": "0001-01-01T00:00:00",
+    "TotalDiscovered": 0
   },
   "https://quotes.toscrape.com/page/2": {
     "Elements": [
@@ -267,7 +268,8 @@
         "Selector": "a[href=\u0027/tag/plans/page/1/\u0027]"
       }
     ],
-    "CachedAt": "2026-06-08T08:40:00.7992513Z"
+    "LastUpdated": "0001-01-01T00:00:00",
+    "TotalDiscovered": 0
   },
   "https://www.goodreads.com/quotes": {
     "Elements": [
@@ -302,6 +304,339 @@
         "Selector": "a[href=\u0027/quotes/tag/attributed-no-source\u0027]"
       }
     ],
-    "CachedAt": "2026-06-20T18:15:37.1627353Z"
+    "LastUpdated": "0001-01-01T00:00:00",
+    "TotalDiscovered": 0
+  },
+  "https://quotes.toscrape.com__guidelines": {
+    "Elements": [
+      {
+        "Index": 1,
+        "Text": "Quotes to Scrape",
+        "Href": "/",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "Quotes to Scrape",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/\u0027]"
+      },
+      {
+        "Index": 4,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/9810.Albert_Einstein",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Albert Einstein (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/9810.Albert_Einstein\u0027]"
+      },
+      {
+        "Index": 7,
+        "Text": "thinking",
+        "Href": "/tag/thinking/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: change deep-thoughts thinking world",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/thinking/page/1/\u0027]"
+      },
+      {
+        "Index": 9,
+        "Text": "(about)",
+        "Href": "/author/J-K-Rowling",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by J.K. Rowling (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/J-K-Rowling\u0027]"
+      },
+      {
+        "Index": 10,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/1077326.J_K_Rowling",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by J.K. Rowling (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/1077326.J_K_Rowling\u0027]"
+      },
+      {
+        "Index": 13,
+        "Text": "(about)",
+        "Href": "/author/Albert-Einstein",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Albert Einstein (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/Albert-Einstein\u0027]"
+      },
+      {
+        "Index": 14,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/9810.Albert_Einstein",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Albert Einstein (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/9810.Albert_Einstein\u0027]"
+      },
+      {
+        "Index": 15,
+        "Text": "inspirational",
+        "Href": "/tag/inspirational/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: inspirational life live miracle miracles",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/inspirational/page/1/\u0027]"
+      },
+      {
+        "Index": 16,
+        "Text": "life",
+        "Href": "/tag/life/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: inspirational life live miracle miracles",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/life/page/1/\u0027]"
+      },
+      {
+        "Index": 27,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/82952.Marilyn_Monroe",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Marilyn Monroe (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/82952.Marilyn_Monroe\u0027]"
+      },
+      {
+        "Index": 31,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/9810.Albert_Einstein",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Albert Einstein (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/9810.Albert_Einstein\u0027]"
+      },
+      {
+        "Index": 32,
+        "Text": "adulthood",
+        "Href": "/tag/adulthood/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: adulthood success value",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/adulthood/page/1/\u0027]"
+      }
+    ],
+    "LastUpdated": "2026-06-20T19:13:50.4399508Z",
+    "TotalDiscovered": 12
+  },
+  "https://quotes.toscrape.com/page/10/__guidelines": {
+    "Elements": [
+      {
+        "Index": 1,
+        "Text": "Quotes to Scrape",
+        "Href": "/",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "Quotes to Scrape",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/\u0027]"
+      },
+      {
+        "Index": 4,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/1077326.J_K_Rowling",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by J.K. Rowling (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/1077326.J_K_Rowling\u0027]"
+      },
+      {
+        "Index": 7,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/7268.Jimi_Hendrix",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Jimi Hendrix (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/7268.Jimi_Hendrix\u0027]"
+      },
+      {
+        "Index": 10,
+        "Text": "(about)",
+        "Href": "/author/J-M-Barrie",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by J.M. Barrie (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/J-M-Barrie\u0027]"
+      },
+      {
+        "Index": 11,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/5255014.J_M_Barrie",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by J.M. Barrie (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/5255014.J_M_Barrie\u0027]"
+      },
+      {
+        "Index": 14,
+        "Text": "(about)",
+        "Href": "/author/E-E-Cummings",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by E.E. Cummings (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/E-E-Cummings\u0027]"
+      },
+      {
+        "Index": 15,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/10547.E_E_Cummings",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by E.E. Cummings (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/10547.E_E_Cummings\u0027]"
+      },
+      {
+        "Index": 21,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/1825.Harper_Lee",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Harper Lee (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/1825.Harper_Lee\u0027]"
+      },
+      {
+        "Index": 22,
+        "Text": "better-life-empathy",
+        "Href": "/tag/better-life-empathy/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: better-life-empathy",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/better-life-empathy/page/1/\u0027]"
+      },
+      {
+        "Index": 24,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/106.Madeleine_L_Engle",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Madeleine L\u0027Engle (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/106.Madeleine_L_Engle\u0027]"
+      },
+      {
+        "Index": 25,
+        "Text": "books",
+        "Href": "/tag/books/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: books children difficult grown-ups write writers writi",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/books/page/1/\u0027]"
+      },
+      {
+        "Index": 30,
+        "Text": "writers",
+        "Href": "/tag/writers/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: books children difficult grown-ups write writers writi",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/writers/page/1/\u0027]"
+      },
+      {
+        "Index": 31,
+        "Text": "writing",
+        "Href": "/tag/writing/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: books children difficult grown-ups write writers writi",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/writing/page/1/\u0027]"
+      },
+      {
+        "Index": 32,
+        "Text": "(about)",
+        "Href": "/author/Mark-Twain",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Mark Twain (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/Mark-Twain\u0027]"
+      },
+      {
+        "Index": 33,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/1244.Mark_Twain",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Mark Twain (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/1244.Mark_Twain\u0027]"
+      },
+      {
+        "Index": 34,
+        "Text": "truth",
+        "Href": "/tag/truth/page/1/",
+        "CssClass": "tag",
+        "TagName": "a",
+        "ParentText": "Tags: truth",
+        "ParentClass": "tags",
+        "Selector": "a[href=\u0027/tag/truth/page/1/\u0027]"
+      },
+      {
+        "Index": 35,
+        "Text": "(about)",
+        "Href": "/author/Dr-Seuss",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Dr. Seuss (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/Dr-Seuss\u0027]"
+      },
+      {
+        "Index": 36,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/61105.Dr_Seuss",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by Dr. Seuss (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/61105.Dr_Seuss\u0027]"
+      },
+      {
+        "Index": 38,
+        "Text": "(about)",
+        "Href": "/author/George-R-R-Martin",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by George R.R. Martin (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027/author/George-R-R-Martin\u0027]"
+      },
+      {
+        "Index": 39,
+        "Text": "(Goodreads page)",
+        "Href": "http://goodreads.com/author/show/346732.George_R_R_Martin",
+        "CssClass": "",
+        "TagName": "a",
+        "ParentText": "by George R.R. Martin (about) - (Goodreads page)",
+        "ParentClass": "",
+        "Selector": "a[href=\u0027http://goodreads.com/author/show/346732.George_R_R_Martin\u0027]"
+      }
+    ],
+    "LastUpdated": "2026-06-20T19:20:30.4967242Z",
+    "TotalDiscovered": 20
   }
 }

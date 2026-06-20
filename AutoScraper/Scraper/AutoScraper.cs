@@ -16,7 +16,7 @@ public class AutoScraper
     private readonly SelectorCache _cache;
     private readonly PageElementExtractor _extractor;
     
-    public AutoScraper(IPage page, string apiKey, AiProvider provider = AiProvider.HuggingFace)
+    public AutoScraper(IPage page, string apiKey, AiProvider provider = AiProvider.Ollama)
     {
         _page = page;
         _ai = new AiClient(apiKey, provider);
@@ -127,7 +127,15 @@ public class AutoScraper
         try
         {
             Console.WriteLine($"[AutoScraper] Querying {_ai.ProviderName} for {label}...");
+        
+            // Debug: show first 5 candidates so we can see what the AI receives
+            Console.WriteLine($"[Debug] First 5 candidates sent to AI:");
+            foreach (var c in candidates.Take(5))
+                Console.WriteLine($"  {c}");
+        
             var found = await _ai.FindDocumentElementsAsync(candidates, goal);
+        
+            Console.WriteLine($"[Debug] AI returned {found.Count} matches for goal: '{goal}'");
 
             if (found.Count > 0)
                 _cache.Merge(cacheKey, found);
@@ -253,37 +261,84 @@ public class AutoScraper
     }
     
     private async Task<ElementSummary?> TryFindNextPageAsync(
-        List<ElementSummary> candidates, string currentUrl)
+    List<ElementSummary> candidates, string currentUrl)
+{
+    try
     {
-        try
+        var baseHost = new Uri(currentUrl).Host;
+
+        // Try direct CSS selector first — much more reliable than AI for pagination
+        // Common next page patterns across most sites
+        var nextSelectors = new[]
         {
-            var baseHost = new Uri(currentUrl).Host;
+            "li.next a",           // quotes.toscrape.com
+            "a[rel='next']",       // semantic HTML
+            ".next a",
+            ".pagination .next",
+            "a:has(~ .sr-only:contains('Next'))",
+            "[aria-label='Next page']",
+            "[aria-label='Next']",
+        };
 
-            var nextPage = await _ai.FindNextPageElementAsync(candidates);
-            if (nextPage == null) return null;
-
-            // Reject if the link leads to a different domain
-            if (!string.IsNullOrWhiteSpace(nextPage.Href))
+        foreach (var selector in nextSelectors)
+        {
+            try
             {
+                var element = await _page.QuerySelectorAsync(selector);
+                if (element == null || !await element.IsVisibleAsync()) continue;
+
+                var href = await element.GetAttributeAsync("href") ?? "";
+                var text = (await element.InnerTextAsync()).Trim();
+
+                if (string.IsNullOrWhiteSpace(href)) continue;
+
+                // Reject external domains
                 try
                 {
-                    var nextHost = new Uri(nextPage.Href).Host;
+                    var nextHost = new Uri(href).Host;
                     if (nextHost != baseHost && !string.IsNullOrWhiteSpace(nextHost))
-                    {
-                        Console.WriteLine($"[AutoScraper] Rejected next page link — " +
-                                          $"points to external domain: {nextHost}");
-                        return null;
-                    }
+                        continue;
                 }
-                catch { /* relative URL — safe to use */ }
-            }
+                catch { /* relative URL — safe */ }
 
-            return nextPage;
+                Console.WriteLine($"[AutoScraper] Next page found via selector " +
+                                  $"'{selector}': {text} → {href}");
+
+                return new ElementSummary
+                {
+                    Text = text,
+                    Href = href,
+                    Selector = selector
+                };
+            }
+            catch { /* try next selector */ }
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[AutoScraper] Could not determine next page — {ex.Message}");
+
+        // Fall back to AI if direct selectors fail
+        Console.WriteLine("[AutoScraper] No next page via CSS — trying AI...");
+        var nextPage = await _ai.FindNextPageElementAsync(candidates);
+        if (nextPage == null || string.IsNullOrWhiteSpace(nextPage.Href))
             return null;
+
+        // Validate domain
+        try
+        {
+            var nextHost = new Uri(nextPage.Href).Host;
+            if (nextHost != baseHost && !string.IsNullOrWhiteSpace(nextHost))
+            {
+                Console.WriteLine($"[AutoScraper] Rejected AI next page — " +
+                                  $"external domain: {nextHost}");
+                return null;
+            }
         }
+        catch { /* relative URL — safe */ }
+
+        return nextPage;
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[AutoScraper] Could not determine next page — {ex.Message}");
+        return null;
+    }
+}
 }

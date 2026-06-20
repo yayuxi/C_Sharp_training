@@ -26,7 +26,7 @@ public class AiClient
     {
         AiProvider.HuggingFace => "Hugging Face",
         AiProvider.Anthropic   => "Anthropic",
-        AiProvider.Ollama      => "mistral:7b-instruct-q4_0",
+        AiProvider.Ollama      => "Ollama (local)",
         AiProvider.Groq        => "Groq",
         _ => "Unknown"
     };
@@ -46,7 +46,12 @@ public class AiClient
         };
         
 
-        _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(60) };
+        _httpClient = new HttpClient
+        {
+            Timeout = provider == AiProvider.Ollama
+                ? TimeSpan.FromSeconds(120)  // Ollama needs time to load model on first call
+                : TimeSpan.FromSeconds(60)
+        };
 
         if (provider == AiProvider.HuggingFace)
             _httpClient.DefaultRequestHeaders.Authorization =
@@ -235,7 +240,7 @@ public class AiClient
     {
         var payload = JsonSerializer.Serialize(new
         {
-            model = _model, // "mistral" for Ollama
+            model = _model,
             messages = new[]
             {
                 new { role = "user", content = prompt }
@@ -244,7 +249,7 @@ public class AiClient
             options = new
             {
                 temperature = 0.1,
-                num_predict = 100  // max tokens
+                num_predict = 100
             }
         });
 
@@ -255,6 +260,13 @@ public class AiClient
                 var content = new StringContent(payload, Encoding.UTF8, "application/json");
                 var response = await _httpClient.PostAsync(
                     "http://localhost:11434/api/chat", content);
+
+                // Log the actual error response so we can see what Ollama says
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorBody = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine($"[AI] Ollama error body: {errorBody}");
+                }
 
                 response.EnsureSuccessStatusCode();
                 var json = await response.Content.ReadAsStringAsync();

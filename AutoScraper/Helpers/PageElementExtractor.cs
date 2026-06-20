@@ -89,7 +89,7 @@ public class PageElementExtractor
 
         var noiseClasses = new[]
         {
-            "nav", "footer", "breadcrumb", "social", "cookie",
+            "footer", "breadcrumb", "social", "cookie",
             "header", "logo", "menu", "skip"
         };
 

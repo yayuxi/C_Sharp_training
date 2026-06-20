@@ -73,8 +73,8 @@ class Program
 
                 var (guidelines, documents) = await autoScraper.ScrapeAsync(
                     url: "https://quotes.toscrape.com",
-                    guidelineGoal: "quotes, titles, or main content items",
-                    documentGoal: "PDF files, downloadable documents, or file links");
+                    guidelineGoal: "quotes or text content — links containing quote text or author names",
+                    documentGoal: "links to other pages, tags, or author pages");
 
                 CsvExporter.Export(guidelines, "auto_guidelines.csv");
                 CsvExporter.Export(documents, "auto_documents.csv");
