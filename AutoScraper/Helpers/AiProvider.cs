@@ -59,7 +59,7 @@ public class AiClient
     }
 
     /// <summary>
-    /// Asks the model to identify which elements match the scraping goal.
+    /// Finds document links — searches through link and button elements.
     /// </summary>
     public async Task<List<ElementSummary>> FindDocumentElementsAsync(
         List<ElementSummary> candidates,
@@ -71,9 +71,38 @@ public class AiClient
         var prompt = $"""
             You are helping a web scraper identify document links on a webpage.
             
-            Goal: Find all elements that are {goal}.
+            Goal: Find all link elements that are {goal}.
             
-            Here are the elements found on the page:
+            Here are the link elements found on the page:
+            {elementList}
+            
+            Return ONLY a JSON array of index numbers for elements that match the goal.
+            Example response: [1, 4, 7]
+            If none match, return: []
+            Return nothing else — no explanation, no markdown, just the JSON array.
+            """;
+
+        var response = await CallApiAsync(prompt);
+        return ParseIndexResponse(response, candidates);
+    }
+
+    /// <summary>
+    /// Finds guideline content — searches through text content elements like
+    /// paragraphs, spans, headings, and blockquotes rather than links.
+    /// </summary>
+    public async Task<List<ElementSummary>> FindGuidelineElementsAsync(
+        List<ElementSummary> candidates,
+        string goal = "main content items, titles, or text to scrape as data")
+    {
+        if (candidates.Count == 0) return [];
+
+        var elementList = string.Join("\n", candidates.Select(c => c.ToString()));
+        var prompt = $"""
+            You are helping a web scraper identify content elements on a webpage.
+            
+            Goal: Find all text content elements that contain {goal}.
+            
+            Here are the content elements found on the page:
             {elementList}
             
             Return ONLY a JSON array of index numbers for elements that match the goal.

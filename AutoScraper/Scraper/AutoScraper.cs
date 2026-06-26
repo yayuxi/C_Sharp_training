@@ -11,6 +11,12 @@ namespace ScraperTemplate.Scraper;
 /// </summary>
 public class AutoScraper
 {
+    /// <summary>
+    /// Optional pre-scrape action — use this to handle JS-heavy sites that need
+    /// interaction before content is visible. Set in Program.cs per site.
+    /// </summary>
+    public Func<IPage, Task>? PreScrapeAction { get; set; }
+    
     private readonly IPage _page;
     private readonly AiClient _ai;
     private readonly SelectorCache _cache;
@@ -29,7 +35,7 @@ public class AutoScraper
     /// Uses cached selectors immediately and expands the cache via AI on each run.
     /// </summary>
     public async Task<(List<Guideline> Guidelines, List<GuidelineDocument> Documents)>
-        ScrapeAsync(string url, string guidelineGoal, string documentGoal)
+    ScrapeAsync(string url, string guidelineGoal, string documentGoal)
     {
         var allGuidelines = new List<Guideline>();
         var allDocuments = new List<GuidelineDocument>();
@@ -44,26 +50,37 @@ public class AutoScraper
                 () => _page.GotoAsync(currentUrl, new PageGotoOptions
                     { WaitUntil = WaitUntilState.NetworkIdle }),
                 _page, currentUrl, $"Loading page {pageNumber}");
+            
+            // After GotoAsync, before extraction:
+            if (PreScrapeAction != null)
+            {
+                Console.WriteLine("[AutoScraper] Running pre-scrape action...");
+                await PreScrapeAction(_page);
+            }
 
-            // Extract all candidate elements from the page
-            var candidates = await _extractor.ExtractCandidatesAsync();
-            Console.WriteLine($"[AutoScraper] Found {candidates.Count} candidate elements");
+            // Extract two separate candidate lists
+            var linkCandidates = await _extractor.ExtractLinkCandidatesAsync();
+            var contentCandidates = await _extractor.ExtractContentCandidatesAsync();
+            Console.WriteLine($"[AutoScraper] Found {linkCandidates.Count} link candidates, " +
+                              $"{contentCandidates.Count} content candidates");
 
-            // Use two separate cache keys — one for guidelines, one for documents
             var guidelineCacheKey = $"{currentUrl}__guidelines";
             var documentCacheKey = $"{currentUrl}__documents";
 
-            // Report what's already cached
             var cachedGuidelines = _cache.GetCachedCount(guidelineCacheKey);
             var cachedDocuments = _cache.GetCachedCount(documentCacheKey);
             Console.WriteLine($"[AutoScraper] Cache status — " +
                               $"guidelines: {cachedGuidelines}, documents: {cachedDocuments}");
 
-            // Try to expand both caches via AI
-            await TryExpandCacheAsync(guidelineCacheKey, candidates, guidelineGoal, "guidelines");
-            await TryExpandCacheAsync(documentCacheKey, candidates, documentGoal, "documents");
+            // Guidelines use content candidates + FindGuidelineElementsAsync
+            await TryExpandGuidelineCacheAsync(
+                guidelineCacheKey, contentCandidates, guidelineGoal);
 
-            // Scrape guidelines from cache
+            // Documents use link candidates + FindDocumentElementsAsync
+            await TryExpandDocumentCacheAsync(
+                documentCacheKey, linkCandidates, documentGoal);
+
+            // Scrape from cache
             if (_cache.TryGet(guidelineCacheKey, out var guidelineElements))
             {
                 var pageGuidelines = await ExtractGuidelinesFromSelectorsAsync(
@@ -73,12 +90,8 @@ public class AutoScraper
                                   $"{pageGuidelines.Count} guidelines scraped");
             }
             else
-            {
-                Console.WriteLine("[AutoScraper] No guideline selectors cached yet " +
-                                  "— run again to accumulate more");
-            }
+                Console.WriteLine("[AutoScraper] No guideline selectors cached yet");
 
-            // Scrape documents from cache
             if (_cache.TryGet(documentCacheKey, out var documentElements))
             {
                 var pageDocs = await ExtractDocumentsFromSelectorsAsync(
@@ -88,17 +101,14 @@ public class AutoScraper
                                   $"{pageDocs.Count} documents scraped");
             }
             else
-            {
-                Console.WriteLine("[AutoScraper] No document selectors cached yet " +
-                                  "— run again to accumulate more");
-            }
+                Console.WriteLine("[AutoScraper] No document selectors cached yet");
 
             Console.WriteLine($"[AutoScraper] Running totals — " +
                               $"guidelines: {allGuidelines.Count}, " +
                               $"documents: {allDocuments.Count}");
 
-            // Check for next page
-            var nextPage = await TryFindNextPageAsync(candidates, currentUrl);
+            // Use link candidates for pagination
+            var nextPage = await TryFindNextPageAsync(linkCandidates, currentUrl);
             if (nextPage == null || string.IsNullOrWhiteSpace(nextPage.Href))
             {
                 Console.WriteLine("[AutoScraper] No next page found — scrape complete");
@@ -114,42 +124,49 @@ public class AutoScraper
         return (allGuidelines, allDocuments);
     }
 
-    // -------------------------------------------------------------------------
-    // Cache expansion
-    // -------------------------------------------------------------------------
-
-    private async Task TryExpandCacheAsync(
-        string cacheKey,
-        List<ElementSummary> candidates,
-        string goal,
-        string label)
+    private async Task TryExpandGuidelineCacheAsync(
+        string cacheKey, List<ElementSummary> candidates, string goal)
     {
         try
         {
-            Console.WriteLine($"[AutoScraper] Querying {_ai.ProviderName} for {label}...");
-        
-            // Debug: show first 5 candidates so we can see what the AI receives
-            Console.WriteLine($"[Debug] First 5 candidates sent to AI:");
-            foreach (var c in candidates.Take(5))
-                Console.WriteLine($"  {c}");
-        
-            var found = await _ai.FindDocumentElementsAsync(candidates, goal);
-        
-            Console.WriteLine($"[Debug] AI returned {found.Count} matches for goal: '{goal}'");
-
+            Console.WriteLine($"[AutoScraper] Querying {_ai.ProviderName} for guidelines...");
+            var found = await _ai.FindGuidelineElementsAsync(candidates, goal);
             if (found.Count > 0)
                 _cache.Merge(cacheKey, found);
             else
-                Console.WriteLine($"[AutoScraper] AI found no new {label} elements");
+                Console.WriteLine("[AutoScraper] AI found no new guideline elements");
         }
         catch (HttpRequestException ex) when (ex.Message.Contains("429"))
         {
-            Console.WriteLine($"[AutoScraper] Rate limited on {label} query — " +
-                              $"using {_cache.GetCachedCount(cacheKey)} cached selectors");
+            Console.WriteLine($"[AutoScraper] Rate limited — " +
+                              $"using {_cache.GetCachedCount(cacheKey)} cached guideline selectors");
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[AutoScraper] AI error for {label} — {ex.Message}");
+            Console.WriteLine($"[AutoScraper] AI error for guidelines — {ex.Message}");
+        }
+    }
+
+    private async Task TryExpandDocumentCacheAsync(
+        string cacheKey, List<ElementSummary> candidates, string goal)
+    {
+        try
+        {
+            Console.WriteLine($"[AutoScraper] Querying {_ai.ProviderName} for documents...");
+            var found = await _ai.FindDocumentElementsAsync(candidates, goal);
+            if (found.Count > 0)
+                _cache.Merge(cacheKey, found);
+            else
+                Console.WriteLine("[AutoScraper] AI found no new document elements");
+        }
+        catch (HttpRequestException ex) when (ex.Message.Contains("429"))
+        {
+            Console.WriteLine($"[AutoScraper] Rate limited — " +
+                              $"using {_cache.GetCachedCount(cacheKey)} cached document selectors");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[AutoScraper] AI error for documents — {ex.Message}");
         }
     }
 
@@ -161,34 +178,38 @@ public class AutoScraper
         List<ElementSummary> cachedElements, string currentUrl)
     {
         var guidelines = new List<Guideline>();
+        var seenTexts = new HashSet<string>(); // prevent duplicates within a page
 
         foreach (var cached in cachedElements)
         {
             try
             {
-                var element = await _page.QuerySelectorAsync(cached.Selector);
-                if (element == null || !await element.IsVisibleAsync()) continue;
+                // A selector like "span.text" matches ALL quotes on the page
+                // so we query all matching elements, not just the first
+                var elements = await _page.QuerySelectorAllAsync(cached.Selector);
 
-                var text = (await element.InnerTextAsync()).Trim();
-                var href = await element.GetAttributeAsync("href") ?? cached.Href;
-
-                if (string.IsNullOrWhiteSpace(text)) continue;
-
-                var sourceUrl = href.StartsWith("http")
-                    ? href
-                    : $"{new Uri(currentUrl).GetLeftPart(UriPartial.Authority)}{href}";
-
-                guidelines.Add(new Guideline
+                foreach (var element in elements)
                 {
-                    GuidelineCode = "",   // AI can't reliably extract these
-                    Title = text,         // from a simple element summary —
-                    Category = "",        // for full field extraction the manual
-                    Step = "",            // scraper is still needed
-                    Status = "",
-                    Dated = DateTime.MinValue,
-                    Summary = "",
-                    SourceUrl = sourceUrl
-                });
+                    if (!await element.IsVisibleAsync()) continue;
+
+                    var text = (await element.InnerTextAsync()).Trim();
+                    if (string.IsNullOrWhiteSpace(text)) continue;
+
+                    // Skip duplicates
+                    if (!seenTexts.Add(text)) continue;
+
+                    guidelines.Add(new Guideline
+                    {
+                        GuidelineCode = "",
+                        Title = text,
+                        Category = "",
+                        Step = "",
+                        Status = "",
+                        Dated = DateTime.MinValue,
+                        Summary = "",
+                        SourceUrl = currentUrl
+                    });
+                }
             }
             catch (Exception ex)
             {
