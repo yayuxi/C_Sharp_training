@@ -34,8 +34,11 @@ public class AutoScraper
     /// Scrapes both guidelines and documents from the target URL.
     /// Uses cached selectors immediately and expands the cache via AI on each run.
     /// </summary>
+    private ExtractionPlan? _guidelinePlan;
+    private ExtractionPlan? _documentPlan;
+
     public async Task<(List<Guideline> Guidelines, List<GuidelineDocument> Documents)>
-    ScrapeAsync(string url, string guidelineGoal, string documentGoal)
+        ScrapeAsync(string url, string guidelineGoal, string documentGoal)
     {
         var allGuidelines = new List<Guideline>();
         var allDocuments = new List<GuidelineDocument>();
@@ -50,64 +53,60 @@ public class AutoScraper
                 () => _page.GotoAsync(currentUrl, new PageGotoOptions
                     { WaitUntil = WaitUntilState.NetworkIdle }),
                 _page, currentUrl, $"Loading page {pageNumber}");
-            
-            // After GotoAsync, before extraction:
+
             if (PreScrapeAction != null)
             {
                 Console.WriteLine("[AutoScraper] Running pre-scrape action...");
                 await PreScrapeAction(_page);
             }
 
-            // Extract two separate candidate lists
-            var linkCandidates = await _extractor.ExtractLinkCandidatesAsync();
-            var contentCandidates = await _extractor.ExtractContentCandidatesAsync();
-            Console.WriteLine($"[AutoScraper] Found {linkCandidates.Count} link candidates, " +
-                              $"{contentCandidates.Count} content candidates");
+            // Get the rendered HTML after JS and accordions have loaded
+            var pageHtml = await _page.ContentAsync();
 
-            var guidelineCacheKey = $"{currentUrl}__guidelines";
-            var documentCacheKey = $"{currentUrl}__documents";
-
-            var cachedGuidelines = _cache.GetCachedCount(guidelineCacheKey);
-            var cachedDocuments = _cache.GetCachedCount(documentCacheKey);
-            Console.WriteLine($"[AutoScraper] Cache status — " +
-                              $"guidelines: {cachedGuidelines}, documents: {cachedDocuments}");
-
-            // Guidelines use content candidates + FindGuidelineElementsAsync
-            await TryExpandGuidelineCacheAsync(
-                guidelineCacheKey, contentCandidates, guidelineGoal);
-
-            // Documents use link candidates + FindDocumentElementsAsync
-            await TryExpandDocumentCacheAsync(
-                documentCacheKey, linkCandidates, documentGoal);
-
-            // Scrape from cache
-            if (_cache.TryGet(guidelineCacheKey, out var guidelineElements))
+            // Ask AI to build extraction plans if we don't have them yet
+            if (_guidelinePlan == null)
             {
-                var pageGuidelines = await ExtractGuidelinesFromSelectorsAsync(
-                    guidelineElements, currentUrl);
-                allGuidelines.AddRange(pageGuidelines);
+                Console.WriteLine("[AutoScraper] Asking AI to analyse page for guidelines...");
+                _guidelinePlan = await TryGetExtractionPlanAsync(
+                    pageHtml, guidelineGoal, "app-accordion-guidline");
+            }
+
+            if (_documentPlan == null)
+            {
+                Console.WriteLine("[AutoScraper] Asking AI to analyse page for documents...");
+                _documentPlan = await TryGetExtractionPlanAsync(
+                    pageHtml, documentGoal, "app-file-accordion");
+            }
+
+            // Extract guidelines using the AI's plan
+            if (_guidelinePlan != null)
+            {
+                var pageGuidelines = await ExtractWithPlanAsync(
+                    _guidelinePlan, currentUrl, isGuideline: true);
+                allGuidelines.AddRange(pageGuidelines.Cast<Guideline>());
                 Console.WriteLine($"[AutoScraper] Page {pageNumber}: " +
                                   $"{pageGuidelines.Count} guidelines scraped");
             }
             else
-                Console.WriteLine("[AutoScraper] No guideline selectors cached yet");
+                Console.WriteLine("[AutoScraper] No guideline plan yet — run again");
 
-            if (_cache.TryGet(documentCacheKey, out var documentElements))
+            // Extract documents using the AI's plan
+            if (_documentPlan != null)
             {
-                var pageDocs = await ExtractDocumentsFromSelectorsAsync(
-                    documentElements, currentUrl);
-                allDocuments.AddRange(pageDocs);
+                var pageDocs = await ExtractWithPlanAsync(
+                    _documentPlan, currentUrl, isGuideline: false);
+                allDocuments.AddRange(pageDocs.Cast<GuidelineDocument>());
                 Console.WriteLine($"[AutoScraper] Page {pageNumber}: " +
                                   $"{pageDocs.Count} documents scraped");
             }
             else
-                Console.WriteLine("[AutoScraper] No document selectors cached yet");
+                Console.WriteLine("[AutoScraper] No document plan yet — run again");
 
             Console.WriteLine($"[AutoScraper] Running totals — " +
                               $"guidelines: {allGuidelines.Count}, " +
                               $"documents: {allDocuments.Count}");
 
-            // Use link candidates for pagination
+            var linkCandidates = await _extractor.ExtractLinkCandidatesAsync();
             var nextPage = await TryFindNextPageAsync(linkCandidates, currentUrl);
             if (nextPage == null || string.IsNullOrWhiteSpace(nextPage.Href))
             {
@@ -124,50 +123,318 @@ public class AutoScraper
         return (allGuidelines, allDocuments);
     }
 
-    private async Task TryExpandGuidelineCacheAsync(
-        string cacheKey, List<ElementSummary> candidates, string goal)
+    private async Task<ExtractionPlan?> TryGetExtractionPlanAsync(
+        string pageHtml, string goal, string sampleHint = "")
     {
         try
         {
-            Console.WriteLine($"[AutoScraper] Querying {_ai.ProviderName} for guidelines...");
-            var found = await _ai.FindGuidelineElementsAsync(candidates, goal);
-            if (found.Count > 0)
-                _cache.Merge(cacheKey, found);
-            else
-                Console.WriteLine("[AutoScraper] AI found no new guideline elements");
-        }
-        catch (HttpRequestException ex) when (ex.Message.Contains("429"))
-        {
-            Console.WriteLine($"[AutoScraper] Rate limited — " +
-                              $"using {_cache.GetCachedCount(cacheKey)} cached guideline selectors");
+            var plan = await _ai.AnalysePageStructureAsync(pageHtml, goal, sampleHint);
+            if (plan == null || !plan.IsValid)
+            {
+                Console.WriteLine("[AutoScraper] AI returned invalid plan");
+                return null;
+            }
+
+            // Validate container selector actually finds elements on the page
+            var containers = await _page.QuerySelectorAllAsync(plan.ContainerSelector);
+            if (containers.Count == 0)
+            {
+                Console.WriteLine($"[AutoScraper] Plan rejected — container " +
+                                  $"'{plan.ContainerSelector}' found 0 elements on page");
+
+                // Log what classes ARE available to help debug
+                var availableClasses = await _page.EvaluateAsync<string>("""
+                    () => {
+                        const classes = new Set();
+                        document.querySelectorAll('[class]').forEach(el => {
+                            el.className.trim().split(/\s+/).forEach(c => {
+                                if (c && !c.includes('ng-') && !c.includes('cdk-'))
+                                    classes.add(c);
+                            });
+                        });
+                        return [...classes].slice(0, 30).join(', ');
+                    }
+                """);
+                Console.WriteLine($"[AutoScraper] Available classes on page: {availableClasses}");
+                return null;
+            }
+
+            // Validate at least one field selector finds something
+            var firstContainer = containers[0];
+            var workingFields = new Dictionary<string, string>();
+            foreach (var (fieldName, selector) in plan.Fields)
+            {
+                var element = await firstContainer.QuerySelectorAsync(selector);
+                if (element != null)
+                {
+                    var text = (await element.InnerTextAsync()).Trim();
+                    if (!string.IsNullOrWhiteSpace(text))
+                    {
+                        workingFields[fieldName] = selector;
+                        Console.WriteLine($"[AutoScraper] Field '{fieldName}' works: '{text[..Math.Min(50, text.Length)]}'");
+                    }
+                    else
+                        Console.WriteLine($"[AutoScraper] Field '{fieldName}' selector found element but text is empty");
+                }
+                else
+                    Console.WriteLine($"[AutoScraper] Field '{fieldName}' selector '{selector}' found nothing");
+            }
+            
+            // After validating the plan, try a known fallback for Step if missing
+            if (sampleHint.Contains("guidline", StringComparison.OrdinalIgnoreCase) &&
+                !workingFields.ContainsKey("Step"))
+            {
+                var stepFallbackSelectors = new[]
+                {
+                    "div:nth-child(2) p em",
+                    "div:nth-child(3) p em",
+                    "em"
+                };
+
+                foreach (var stepSelector in stepFallbackSelectors)
+                {
+                    var stepElement = await containers[0].QuerySelectorAsync(stepSelector);
+                    if (stepElement != null)
+                    {
+                        var stepText = (await stepElement.InnerTextAsync()).Trim();
+                        if (!string.IsNullOrWhiteSpace(stepText))
+                        {
+                            workingFields["Step"] = stepSelector;
+                            Console.WriteLine($"[AutoScraper] Step fallback found via '{stepSelector}': '{stepText}'");
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (workingFields.Count == 0)
+            {
+                Console.WriteLine("[AutoScraper] Plan rejected — no field selectors work");
+                return null;
+            }
+
+            // Return plan with only the working fields
+            plan.Fields = workingFields;
+            Console.WriteLine($"[AutoScraper] Plan validated — {containers.Count} containers, " +
+                              $"{workingFields.Count} working fields");
+            return plan;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[AutoScraper] AI error for guidelines — {ex.Message}");
+            Console.WriteLine($"[AutoScraper] Failed to get extraction plan — {ex.Message}");
+            return null;
         }
     }
 
-    private async Task TryExpandDocumentCacheAsync(
-        string cacheKey, List<ElementSummary> candidates, string goal)
+    private async Task<List<object>> ExtractWithPlanAsync(
+        ExtractionPlan plan, string currentUrl, bool isGuideline)
     {
+        var results = new List<object>();
+
         try
         {
-            Console.WriteLine($"[AutoScraper] Querying {_ai.ProviderName} for documents...");
-            var found = await _ai.FindDocumentElementsAsync(candidates, goal);
-            if (found.Count > 0)
-                _cache.Merge(cacheKey, found);
-            else
-                Console.WriteLine("[AutoScraper] AI found no new document elements");
-        }
-        catch (HttpRequestException ex) when (ex.Message.Contains("429"))
-        {
-            Console.WriteLine($"[AutoScraper] Rate limited — " +
-                              $"using {_cache.GetCachedCount(cacheKey)} cached document selectors");
+            var containers = await _page.QuerySelectorAllAsync(plan.ContainerSelector);
+            Console.WriteLine($"[AutoScraper] Found {containers.Count} containers " +
+                              $"with selector '{plan.ContainerSelector}'");
+
+            var seenValues = new HashSet<string>();
+
+            foreach (var container in containers)
+            {
+                try
+                {
+                    var fields = new Dictionary<string, string>();
+                    foreach (var (fieldName, selector) in plan.Fields)
+                    {
+                        try
+                        {
+                            var element = await container.QuerySelectorAsync(selector);
+                            if (element != null)
+                            {
+                                var raw = (await element.InnerTextAsync()).Trim();
+                                fields[fieldName] = CleanFieldValue(raw);
+                            }
+                            else fields[fieldName] = "";
+                        }
+                        catch { fields[fieldName] = ""; }
+                    }
+
+                    if (fields.Values.All(string.IsNullOrWhiteSpace)) continue;
+
+                    if (isGuideline)
+                    {
+                        // Code and title always come from the accordion header,
+                        // never from the AI-discovered container, since they
+                        // live outside the sample the AI was shown
+                        var (code, title) = await GetCodeAndTitleFromHeaderAsync(container);
+
+                        var summary = GetFieldFlexible(fields, "summary", "guidelinedescription", "description");
+                        var dateText = GetFieldFlexible(fields, "date", "dated");
+                        var step = GetFieldFlexible(fields, "step", "status");
+
+                        DateTime.TryParse(dateText, out var dated);
+
+                        if (string.IsNullOrWhiteSpace(code) && string.IsNullOrWhiteSpace(title))
+                            continue;
+
+                        var fingerprint = code + "|" + title;
+                        if (!seenValues.Add(fingerprint)) continue;
+
+                        results.Add(new Guideline
+                        {
+                            GuidelineCode = code,
+                            Title = title,
+                            Step = step,
+                            Status = DeriveStatus(step),
+                            Dated = dated,
+                            Summary = summary,
+                            SourceUrl = currentUrl
+                        });
+                    }
+                    else
+                    {
+                        // unchanged document logic
+                        var href = "";
+                        try
+                        {
+                            var linkElement = await container.QuerySelectorAsync("a[href]");
+                            if (linkElement != null)
+                            {
+                                href = await linkElement.GetAttributeAsync("href") ?? "";
+                                if (string.IsNullOrWhiteSpace(GetFieldFlexible(fields, "title")))
+                                    fields["Title"] = (await linkElement.InnerTextAsync()).Trim();
+                            }
+                        }
+                        catch { }
+
+                        var docUrl = href.StartsWith("http")
+                            ? href
+                            : string.IsNullOrWhiteSpace(href)
+                                ? currentUrl
+                                : $"{new Uri(currentUrl).GetLeftPart(UriPartial.Authority)}{href}";
+
+                        var cssClass = "";
+                        try
+                        {
+                            var linkEl = await container.QuerySelectorAsync("a");
+                            cssClass = await linkEl?.GetAttributeAsync("class") ?? "";
+                        }
+                        catch { }
+
+                        var rawTitle = GetFieldFlexible(fields, "title")
+                            .IfEmpty(fields.Values.FirstOrDefault(v => !string.IsNullOrWhiteSpace(v)) ?? "");
+
+                        var codeMatch = System.Text.RegularExpressions.Regex.Match(
+                            rawTitle, @"^([A-Z]\d+[A-Z]?(?:\([A-Z0-9]+\))?)\s+(.+)$");
+                        var docCode = codeMatch.Success ? codeMatch.Groups[1].Value : "";
+                        var docTitle = codeMatch.Success ? codeMatch.Groups[2].Value : rawTitle;
+
+                        var fingerprint = docUrl;
+                        if (!seenValues.Add(fingerprint)) continue;
+
+                        results.Add(new GuidelineDocument
+                        {
+                            GuidelineCode = docCode,
+                            DocumentTitle = docTitle,
+                            DocumentUrl = docUrl,
+                            DocumentType = GetFieldFlexible(fields, "type").IfEmpty("Document"),
+                            FileFormat = InferFileFormat(cssClass, docUrl)
+                        });
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[AutoScraper] Container extraction failed — {ex.Message}");
+                }
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[AutoScraper] AI error for documents — {ex.Message}");
+            Console.WriteLine($"[AutoScraper] Plan extraction failed — {ex.Message}");
         }
+
+        return results;
+    }
+
+    /// <summary>
+    /// Looks up a field by trying several possible key variations case-insensitively,
+    /// since the AI may return slightly different field names each time.
+    /// </summary>
+    private static string GetFieldFlexible(Dictionary<string, string> fields, params string[] candidates)
+    {
+        foreach (var candidate in candidates)
+        {
+            var match = fields.FirstOrDefault(f =>
+                f.Key.Equals(candidate, StringComparison.OrdinalIgnoreCase) ||
+                f.Key.Contains(candidate, StringComparison.OrdinalIgnoreCase));
+            if (!string.IsNullOrWhiteSpace(match.Value))
+                return match.Value;
+        }
+        return "";
+    }
+
+    /// <summary>
+    /// Gets the guideline code and title from the accordion header,
+    /// which is structurally outside the AI's sample container.
+    /// This mirrors the known ICH structure: jaspero-variable-content > div > section > span[1], span[2]
+    /// </summary>
+    private async Task<(string Code, string Title)> GetCodeAndTitleFromHeaderAsync(
+        IElementHandle container)
+    {
+        try
+        {
+            var result = await container.EvaluateAsync<string>("""
+                el => {
+                    let node = el;
+                    // Walk up to find the jaspero-accord ancestor
+                    while (node && node.tagName?.toLowerCase() !== 'jaspero-accord')
+                        node = node.parentElement;
+                    if (!node) return '';
+
+                    const header = node.querySelector(
+                        'div:first-child jaspero-variable-content div section');
+                    if (!header) return '';
+
+                    const spans = header.querySelectorAll('span');
+                    if (spans.length === 0) return '';
+                    const code = spans[0]?.innerText.trim() ?? '';
+                    const title = spans.length > 1 ? spans[1].innerText.trim() : '';
+                    return code + '|||' + title;
+                }
+            """);
+
+            var parts = result.Split("|||");
+            return (parts.Length > 0 ? parts[0] : "", parts.Length > 1 ? parts[1] : "");
+        }
+        catch
+        {
+            return ("", "");
+        }
+    }
+    
+    private static string CleanFieldValue(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value)) return value;
+
+        // Remove common label prefixes ending with colon
+        // e.g. "Date of Step 4:\n6 February 2003" → "6 February 2003"
+        // e.g. "Status: Step 5" → "Step 5"
+        var colonIndex = value.IndexOf(':');
+        if (colonIndex > 0 && colonIndex < 40)
+        {
+            var afterColon = value[(colonIndex + 1)..].Trim();
+            if (!string.IsNullOrWhiteSpace(afterColon))
+                return afterColon;
+        }
+
+        return value.Trim();
+    }
+
+    private static string DeriveStatus(string step)
+    {
+        if (string.IsNullOrWhiteSpace(step)) return "Retired";
+        if (step.Contains("5")) return "Finalised";
+        return "Under Development";
     }
 
     // -------------------------------------------------------------------------

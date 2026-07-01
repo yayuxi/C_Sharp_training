@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ICHScraper")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+57c4e7ea01eefe40c55288c88ec61d5751cdbe50")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+411e7b1df813eb10474278d9f910c3fe7a10b4f5")]
 [assembly: System.Reflection.AssemblyProductAttribute("ICHScraper")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ICHScraper")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

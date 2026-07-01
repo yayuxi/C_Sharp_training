@@ -49,7 +49,7 @@ public class AiClient
         _httpClient = new HttpClient
         {
             Timeout = provider == AiProvider.Ollama
-                ? TimeSpan.FromSeconds(120)  // Ollama needs time to load model on first call
+                ? TimeSpan.FromSeconds(300)  // Ollama needs time to load model on first call
                 : TimeSpan.FromSeconds(60)
         };
 
@@ -360,6 +360,188 @@ public class AiClient
         }
 
         throw new ScraperException("[AI] Groq API failed after 3 attempts");
+    }
+    
+    /// <summary>
+    /// Asks the AI to analyse the page HTML and return a complete extraction plan
+    /// including the container selector and field selectors for each record.
+    /// </summary>
+    public async Task<ExtractionPlan?> AnalysePageStructureAsync(
+        string pageHtml, string goal, string sampleHint = "app-accordion-guidline")
+    {
+        var sample = ExtractRepresentativeSample(pageHtml, sampleHint);
+        Console.WriteLine($"[AI] Sending {sample.Length} chars to model for analysis");
+
+        var jsonExample = """{"containerSelector":"CSS selector","fields":{"FieldName":"CSS selector"}}""";
+
+        var isGuidelineGoal = sampleHint.Contains("guidline", StringComparison.OrdinalIgnoreCase);
+
+        var fieldGuidance = isGuidelineGoal
+            ? """
+              Use EXACTLY these field names (only include ones you can find real selectors for):
+              - "Summary" for the main descriptive paragraph text
+              - "Date" for a date value (look for text that looks like a date, e.g. "27 October 1994")
+              - "Step" for step information — look specifically for text inside an <em> tag,
+                it often reads like "Step 5" or similar
+              """
+            : """
+              Use EXACTLY these field names (only include ones you can find real selectors for):
+              - "Title" for the document name or link text
+              - "Type" for any document category or type label, if present
+              """;
+
+        var prompt = $"""
+                      You are a web scraping expert. Analyse this HTML and return CSS selectors.
+
+                      Goal: Extract {goal}
+
+                      HTML sample:
+                      {sample}
+
+                      IMPORTANT: Only use class names and element names that actually appear in the HTML above.
+                      Do not invent class names. Do not return empty string selectors — omit fields you can't find.
+
+                      {fieldGuidance}
+
+                      Return ONLY this JSON structure with real selectors from the HTML:
+                      {jsonExample}
+
+                      JSON:
+                      """;
+
+        var response = await CallOllamaWithTokensAsync(prompt, maxTokens: 300);
+        return ParseExtractionPlan(response);
+    }
+
+    private static string ExtractRepresentativeSample(string html, string startMarker)
+    {
+        var start = html.IndexOf($"<{startMarker}", StringComparison.OrdinalIgnoreCase);
+        if (start == -1)
+        {
+            // Fall back through common markers
+            foreach (var marker in new[] { "app-guideline-item", "jaspero-accord", "article" })
+            {
+                start = html.IndexOf($"<{marker}", StringComparison.OrdinalIgnoreCase);
+                if (start != -1)
+                {
+                    Console.WriteLine($"[AI] Found sample starting at '{marker}'");
+                    break;
+                }
+            }
+        }
+        else
+        {
+            Console.WriteLine($"[AI] Found sample starting at '{startMarker}'");
+        }
+
+        if (start == -1) return html[..Math.Min(3000, html.Length)];
+
+        var end = Math.Min(start + 3000, html.Length);
+        var closeTag = html.LastIndexOf('>', end);
+        return closeTag > start ? html[start..(closeTag + 1)] : html[start..end];
+    }
+
+    private async Task<string> CallOllamaWithTokensAsync(string prompt, int maxTokens)
+    {
+        var payload = JsonSerializer.Serialize(new
+        {
+            model = _model,
+            messages = new[] { new { role = "user", content = prompt } },
+            stream = false,
+            options = new
+            {
+                temperature = 0.1,
+                num_predict = maxTokens
+            }
+        });
+
+        for (int attempt = 1; attempt <= 3; attempt++)
+        {
+            try
+            {
+                var content = new StringContent(payload, Encoding.UTF8, "application/json");
+                var response = await _httpClient.PostAsync(
+                    "http://localhost:11434/api/chat", content);
+                response.EnsureSuccessStatusCode();
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+                return doc.RootElement
+                    .GetProperty("message")
+                    .GetProperty("content")
+                    .GetString() ?? "";
+            }
+            catch (Exception ex) when (attempt < 3)
+            {
+                Console.WriteLine($"[AI] Ollama attempt {attempt} failed — {ex.Message}");
+                await Task.Delay(3000 * attempt);
+            }
+        }
+        throw new ScraperException("[AI] Ollama failed after 3 attempts");
+    }
+
+    private static string ExtractRepresentativeSample(string html)
+    {
+        // Try to find app-accordion-guidline as the record container
+        var markers = new[]
+        {
+            "app-accordion-guidline",
+            "app-guideline-item",
+            "jaspero-accord",
+            ".quote",
+            "article"
+        };
+
+        foreach (var marker in markers)
+        {
+            var start = html.IndexOf($"<{marker}", StringComparison.OrdinalIgnoreCase);
+            if (start == -1) continue;
+
+            // Find a reasonable end point — take ~3000 chars from the first record
+            var end = Math.Min(start + 3000, html.Length);
+
+            // Try to close at a tag boundary
+            var closeTag = html.LastIndexOf('>', end);
+            if (closeTag > start)
+                end = closeTag + 1;
+
+            var sample = html[start..end];
+            Console.WriteLine($"[AI] Found sample starting at '{marker}'");
+            return sample;
+        }
+
+        // Fallback — take the middle section of the HTML where content usually lives
+        var mid = html.Length / 3;
+        return html[mid..Math.Min(mid + 3000, html.Length)];
+    }
+
+    private static ExtractionPlan? ParseExtractionPlan(string response)
+    {
+        Console.WriteLine($"[AI] Raw extraction plan response: {response}");
+        try
+        {
+            var cleaned = response.Trim();
+            var start = cleaned.IndexOf('{');
+            var end = cleaned.LastIndexOf('}');
+            if (start == -1 || end == -1) return null;
+
+            var json = cleaned[start..(end + 1)];
+            var plan = JsonSerializer.Deserialize<ExtractionPlan>(json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            if (plan == null) return null;
+
+            // Strip out fields with empty or whitespace-only selectors
+            plan.Fields = plan.Fields
+                .Where(f => !string.IsNullOrWhiteSpace(f.Value))
+                .ToDictionary(f => f.Key, f => f.Value);
+
+            return plan;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[AI] Failed to parse extraction plan: {ex.Message}");
+            return null;
+        }
     }
 
     // -------------------------------------------------------------------------

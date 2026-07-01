@@ -170,16 +170,57 @@ class Program
                 Console.WriteLine($"\n{new string('=', 50)}");
                 Console.WriteLine($"Scraping category: {categoryName}");
                 Console.WriteLine(new string('=', 50));
+                
+                // Fresh AutoScraper per category so AI analyses each page independently
+                autoScraper = new AutoScraper(page, aiApiKey, aiProvider);
+                autoScraper.PreScrapeAction = async (p) =>
+                {
+                    await p.WaitForSelectorAsync("jaspero-accordion",
+                        new PageWaitForSelectorOptions { Timeout = 15000 });
+                    await p.WaitForTimeoutAsync(2000);
 
-                // Clear cache between categories so selectors don't cross-contaminate
-                File.Delete("selector_cache.json");
+                    var outerAccords = await p.QuerySelectorAllAsync(
+                        "app-accordion > jaspero-accordion > jaspero-accord");
+                    Console.WriteLine($"[PreScrape] Found {outerAccords.Count} outer accordions");
+
+                    foreach (var outerAccord in outerAccords)
+                    {
+                        try
+                        {
+                            var outerHeader = await outerAccord.QuerySelectorAsync("div:first-child");
+                            if (outerHeader == null) continue;
+                            await outerHeader.ClickAsync();
+                            await p.WaitForTimeoutAsync(600);
+
+                            var innerAccords = await outerAccord.QuerySelectorAllAsync(
+                                "jaspero-accordion > jaspero-accord");
+                            Console.WriteLine(
+                                $"[PreScrape] Expanding {innerAccords.Count} inner accordions in group...");
+
+                            foreach (var innerAccord in innerAccords)
+                            {
+                                try
+                                {
+                                    var innerHeader = await innerAccord.QuerySelectorAsync("div:first-child");
+                                    if (innerHeader == null) continue;
+                                    await innerHeader.ClickAsync();
+                                    await p.WaitForTimeoutAsync(300);
+                                }
+                                catch { }
+                            }
+                        }
+                        catch { }
+                    }
+
+                    await p.WaitForTimeoutAsync(1000);
+                    Console.WriteLine("[PreScrape] All accordions expanded");
+                };
 
                 var (guidelines, documents) = await autoScraper.ScrapeAsync(
                     url: categoryUrl,
                     guidelineGoal: guidelineGoal,
                     documentGoal: documentGoal);
 
-                // Tag each guideline with its category name
                 foreach (var g in guidelines)
                     allGuidelines.Add(g with { Category = categoryName });
 
