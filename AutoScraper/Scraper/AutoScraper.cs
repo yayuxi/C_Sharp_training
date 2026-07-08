@@ -74,8 +74,37 @@ public class AutoScraper
             if (_documentPlan == null)
             {
                 Console.WriteLine("[AutoScraper] Asking AI to analyse page for documents...");
-                _documentPlan = await TryGetExtractionPlanAsync(
-                    pageHtml, documentGoal, "app-file-accordion");
+                _documentPlan = await TryGetExtractionPlanAsync(pageHtml, documentGoal, "app-file-accordion");
+
+                // If AI failed, try known document selectors directly
+                if (_documentPlan == null)
+                {
+                    Console.WriteLine("[AutoScraper] AI document plan failed — trying fallback selectors...");
+                    var docFallbacks = new[]
+                    {
+                        ".document-pdf",
+                        ".document-link",
+                        "a.document-pdf, a.document-link"
+                    };
+
+                    foreach (var selector in docFallbacks)
+                    {
+                        var testEl = await _page.QuerySelectorAsync(selector);
+                        if (testEl != null)
+                        {
+                            Console.WriteLine($"[AutoScraper] Document fallback selector works: '{selector}'");
+                            _documentPlan = new ExtractionPlan
+                            {
+                                ContainerSelector = ".accordion-wrapper",
+                                Fields = new Dictionary<string, string>
+                                {
+                                    ["Title"] = selector
+                                }
+                            };
+                            break;
+                        }
+                    }
+                }
             }
 
             // Extract guidelines using the AI's plan
@@ -180,29 +209,107 @@ public class AutoScraper
                     Console.WriteLine($"[AutoScraper] Field '{fieldName}' selector '{selector}' found nothing");
             }
             
-            // After validating the plan, try a known fallback for Step if missing
-            if (sampleHint.Contains("guidline", StringComparison.OrdinalIgnoreCase) &&
-                !workingFields.ContainsKey("Step"))
+            // After validating working fields, fill in any missing ones with known fallbacks
+            if (sampleHint.Contains("guidline", StringComparison.OrdinalIgnoreCase))
             {
-                var stepFallbackSelectors = new[]
+                // Summary fallback
+                if (!workingFields.ContainsKey("Summary"))
                 {
-                    "div:nth-child(2) p em",
-                    "div:nth-child(3) p em",
-                    "em"
+                    var summaryFallbacks = new[]
+                    {
+                        ".accordion-guideline-item-value p",
+                        ".accordion-guideline-item-value",
+                        "section:nth-child(1) p"
+                    };
+                    foreach (var s in summaryFallbacks)
+                    {
+                        var el = await containers[0].QuerySelectorAsync(s);
+                        if (el != null)
+                        {
+                            var text = (await el.InnerTextAsync()).Trim();
+                            if (!string.IsNullOrWhiteSpace(text) && text.Length > 20)
+                            {
+                                workingFields["Summary"] = s;
+                                Console.WriteLine($"[AutoScraper] Summary fallback found via '{s}'");
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Date fallback
+                if (!workingFields.ContainsKey("Date"))
+                {
+                    var dateFallbacks = new[]
+                    {
+                        "div:nth-child(2) > div:nth-child(1) > p:nth-child(2)",
+                        "div:nth-child(3) > div:nth-child(1) > p:nth-child(2)",
+                        ".accordion-guideline-item-separator p:nth-child(2)"
+                    };
+                    foreach (var s in dateFallbacks)
+                    {
+                        var el = await containers[0].QuerySelectorAsync(s);
+                        if (el != null)
+                        {
+                            var text = (await el.InnerTextAsync()).Trim();
+                            if (!string.IsNullOrWhiteSpace(text))
+                            {
+                                workingFields["Date"] = s;
+                                Console.WriteLine($"[AutoScraper] Date fallback found via '{s}': '{text}'");
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Step fallback
+                if (!workingFields.ContainsKey("Step"))
+                {
+                    var stepFallbacks = new[]
+                        { "div:nth-child(2) p em", "div:nth-child(3) p em", "em" };
+                    foreach (var s in stepFallbacks)
+                    {
+                        var el = await containers[0].QuerySelectorAsync(s);
+                        if (el != null)
+                        {
+                            var text = (await el.InnerTextAsync()).Trim();
+                            if (!string.IsNullOrWhiteSpace(text))
+                            {
+                                workingFields["Step"] = s;
+                                Console.WriteLine($"[AutoScraper] Step fallback found via '{s}': '{text}'");
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // After the AI plan fails for documents, try known document selectors
+            if (_documentPlan == null && !sampleHint.Contains("guidline"))
+            {
+                Console.WriteLine("[AutoScraper] Trying document fallback selectors...");
+                var docFallbacks = new[]
+                {
+                    ".document-pdf",
+                    ".document-link",
+                    "a.document-pdf, a.document-link"
                 };
 
-                foreach (var stepSelector in stepFallbackSelectors)
+                foreach (var selector in docFallbacks)
                 {
-                    var stepElement = await containers[0].QuerySelectorAsync(stepSelector);
-                    if (stepElement != null)
+                    var testEl = await _page.QuerySelectorAsync(selector);
+                    if (testEl != null)
                     {
-                        var stepText = (await stepElement.InnerTextAsync()).Trim();
-                        if (!string.IsNullOrWhiteSpace(stepText))
+                        Console.WriteLine($"[AutoScraper] Document fallback found via '{selector}'");
+                        _documentPlan = new ExtractionPlan
                         {
-                            workingFields["Step"] = stepSelector;
-                            Console.WriteLine($"[AutoScraper] Step fallback found via '{stepSelector}': '{stepText}'");
-                            break;
-                        }
+                            ContainerSelector = ".accordion-wrapper",
+                            Fields = new Dictionary<string, string>
+                            {
+                                ["Title"] = selector
+                            }
+                        };
+                        break;
                     }
                 }
             }

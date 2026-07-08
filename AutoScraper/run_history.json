@@ -1,0 +1,26 @@
+[
+  {
+    "RunNumber": 1,
+    "Timestamp": "2026-07-06T14:35:02.8988378+02:00",
+    "GuidelinesFound": 155,
+    "DocumentsFound": 145
+  },
+  {
+    "RunNumber": 2,
+    "Timestamp": "2026-07-06T14:52:36.4287759+02:00",
+    "GuidelinesFound": 155,
+    "DocumentsFound": 145
+  },
+  {
+    "RunNumber": 3,
+    "Timestamp": "2026-07-07T12:34:38.7732933+02:00",
+    "GuidelinesFound": 155,
+    "DocumentsFound": 145
+  },
+  {
+    "RunNumber": 4,
+    "Timestamp": "2026-07-07T12:37:26.2276823+02:00",
+    "GuidelinesFound": 155,
+    "DocumentsFound": 145
+  }
+]

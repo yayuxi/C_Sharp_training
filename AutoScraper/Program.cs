@@ -236,9 +236,14 @@ class Program
         }
         finally
         {
-            // Always save whatever was collected, even if an error occurred mid-run
             CsvExporter.Export(allGuidelines, "auto_guidelines.csv");
             CsvExporter.Export(allDocuments, "auto_documents.csv");
+
+            // Record and display run history
+            var tracker = new RunTracker();
+            tracker.RecordRun(allGuidelines.Count, allDocuments.Count);
+            tracker.PrintSummary();
+
             Console.WriteLine($"\n[Done] {allGuidelines.Count} total guidelines, " +
                               $"{allDocuments.Count} total documents saved");
 
