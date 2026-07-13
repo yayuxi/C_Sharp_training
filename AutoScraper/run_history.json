@@ -22,5 +22,41 @@
     "Timestamp": "2026-07-07T12:37:26.2276823+02:00",
     "GuidelinesFound": 155,
     "DocumentsFound": 145
+  },
+  {
+    "RunNumber": 5,
+    "Timestamp": "2026-07-08T18:58:01.256294+02:00",
+    "GuidelinesFound": 82,
+    "DocumentsFound": 22
+  },
+  {
+    "RunNumber": 6,
+    "Timestamp": "2026-07-13T11:51:25.2486628+02:00",
+    "GuidelinesFound": 0,
+    "DocumentsFound": 22
+  },
+  {
+    "RunNumber": 7,
+    "Timestamp": "2026-07-13T11:58:39.2123666+02:00",
+    "GuidelinesFound": 0,
+    "DocumentsFound": 22
+  },
+  {
+    "RunNumber": 8,
+    "Timestamp": "2026-07-13T12:39:37.7745267+02:00",
+    "GuidelinesFound": 155,
+    "DocumentsFound": 70
+  },
+  {
+    "RunNumber": 9,
+    "Timestamp": "2026-07-13T15:32:48.7140875+02:00",
+    "GuidelinesFound": 155,
+    "DocumentsFound": 48
+  },
+  {
+    "RunNumber": 10,
+    "Timestamp": "2026-07-13T15:36:10.5291758+02:00",
+    "GuidelinesFound": 155,
+    "DocumentsFound": 22
   }
 ]

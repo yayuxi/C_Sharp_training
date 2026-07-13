@@ -13,8 +13,10 @@ public enum AiProvider
 }
 
 /// <summary>
-/// Sends element summaries to an AI model and parses returned document selectors.
-/// Supports both Hugging Face and Anthropic — switch via AiProvider in Program.cs.
+/// Sends HTML samples to an AI model and returns structured extraction plans
+/// (container selector + field selectors) for use by AutoScraper.
+/// Also handles pagination detection via element summary lists.
+/// Switch provider and API key in Program.cs.
 /// </summary>
 public class AiClient
 {
@@ -22,6 +24,7 @@ public class AiClient
     private readonly string _apiKey;
     private readonly AiProvider _provider;
     private readonly string _model;
+
     public string ProviderName => _provider switch
     {
         AiProvider.HuggingFace => "Hugging Face",
@@ -31,25 +34,23 @@ public class AiClient
         _ => "Unknown"
     };
 
-    public AiClient(string apiKey, AiProvider provider = AiProvider.HuggingFace,
-        string? model = null)
+    public AiClient(string apiKey, AiProvider provider = AiProvider.Ollama, string? model = null)
     {
-        _apiKey = apiKey;
+        _apiKey   = apiKey;
         _provider = provider;
-        _model = model ?? provider switch
+        _model    = model ?? provider switch
         {
             AiProvider.HuggingFace => "mistralai/Mistral-7B-Instruct-v0.3",
-            AiProvider.Anthropic   => "claude-haiku-4-5-20251001", // fastest + cheapest
+            AiProvider.Anthropic   => "claude-haiku-4-5-20251001",
             AiProvider.Ollama      => "mistral:7b-instruct-q4_0",
-            AiProvider.Groq        => "llama-3.1-8b-instant",
+            AiProvider.Groq        => "llama-3.3-70b-versatile",
             _ => throw new ArgumentOutOfRangeException(nameof(provider))
         };
-        
 
         _httpClient = new HttpClient
         {
             Timeout = provider == AiProvider.Ollama
-                ? TimeSpan.FromSeconds(300)  // Ollama needs time to load model on first call
+                ? TimeSpan.FromSeconds(300)
                 : TimeSpan.FromSeconds(60)
         };
 
@@ -58,65 +59,67 @@ public class AiClient
                 new AuthenticationHeaderValue("Bearer", apiKey);
     }
 
-    /// <summary>
-    /// Finds document links — searches through link and button elements.
-    /// </summary>
-    public async Task<List<ElementSummary>> FindDocumentElementsAsync(
-        List<ElementSummary> candidates,
-        string goal = "regulatory documents, guidelines, or PDF files")
-    {
-        if (candidates.Count == 0) return [];
+    // -------------------------------------------------------------------------
+    // Page structure analysis
+    // -------------------------------------------------------------------------
 
-        var elementList = string.Join("\n", candidates.Select(c => c.ToString()));
+    /// <summary>
+    /// Analyses a representative HTML sample and returns a plan describing
+    /// which CSS selectors to use for the container and each field.
+    /// </summary>
+    public async Task<ExtractionPlan?> AnalysePageStructureAsync(
+        string pageHtml, string goal, string sampleHint = "app-accordion-guidline")
+    {
+        var sample = ExtractRepresentativeSample(pageHtml, sampleHint);
+        Console.WriteLine($"[AI] Sending {sample.Length} chars to model for analysis");
+        Console.WriteLine($"[AI] HTML sample:\n{sample}\n[AI] End of sample");
+
+        var isGuidelineGoal = sampleHint.Contains("guidline", StringComparison.OrdinalIgnoreCase);
+        var jsonExample = """{"containerSelector":"CSS selector","fields":{"FieldName":"CSS selector"}}""";
+
+        var fieldGuidance = isGuidelineGoal
+            ? """
+              Use EXACTLY these field names (only include ones you can find real selectors for):
+              - "Summary" for the main descriptive paragraph text
+              - "Date" for a date value (look for text that looks like a date, e.g. "27 October 1994")
+              - "Step" for step information — look for text inside an <em> tag, e.g. "Step 5"
+              """
+            : """
+              Use EXACTLY these field names (only include ones you can find real selectors for):
+              - "Title" for the document name or link text
+              - "Type" for any document category or type label, if present
+              """;
+
         var prompt = $"""
-            You are helping a web scraper identify document links on a webpage.
+            You are a web scraping expert. Analyse this HTML and return CSS selectors.
             
-            Goal: Find all link elements that are {goal}.
+            Goal: Extract {goal}
             
-            Here are the link elements found on the page:
-            {elementList}
+            HTML sample:
+            {sample}
             
-            Return ONLY a JSON array of index numbers for elements that match the goal.
-            Example response: [1, 4, 7]
-            If none match, return: []
-            Return nothing else — no explanation, no markdown, just the JSON array.
+            IMPORTANT: Only use class names and element names that actually appear in the HTML above.
+            Do not invent class names. Do not return empty string selectors — omit fields you cannot find.
+            
+            {fieldGuidance}
+            
+            Return ONLY this JSON structure with real selectors from the HTML:
+            {jsonExample}
+            
+            JSON:
             """;
 
-        var response = await CallApiAsync(prompt);
-        return ParseIndexResponse(response, candidates);
+        var response = await CallApiAsync(prompt, maxTokens: 300);
+        return ParseExtractionPlan(response);
     }
 
-    /// <summary>
-    /// Finds guideline content — searches through text content elements like
-    /// paragraphs, spans, headings, and blockquotes rather than links.
-    /// </summary>
-    public async Task<List<ElementSummary>> FindGuidelineElementsAsync(
-        List<ElementSummary> candidates,
-        string goal = "main content items, titles, or text to scrape as data")
-    {
-        if (candidates.Count == 0) return [];
-
-        var elementList = string.Join("\n", candidates.Select(c => c.ToString()));
-        var prompt = $"""
-            You are helping a web scraper identify content elements on a webpage.
-            
-            Goal: Find all text content elements that contain {goal}.
-            
-            Here are the content elements found on the page:
-            {elementList}
-            
-            Return ONLY a JSON array of index numbers for elements that match the goal.
-            Example response: [1, 4, 7]
-            If none match, return: []
-            Return nothing else — no explanation, no markdown, just the JSON array.
-            """;
-
-        var response = await CallApiAsync(prompt);
-        return ParseIndexResponse(response, candidates);
-    }
+    // -------------------------------------------------------------------------
+    // Pagination detection
+    // -------------------------------------------------------------------------
 
     /// <summary>
-    /// Asks the model to identify the next page button if pagination is present.
+    /// Identifies the next page button from a list of candidate elements.
+    /// Used as a fallback when CSS pagination selectors find nothing.
     /// </summary>
     public async Task<ElementSummary?> FindNextPageElementAsync(
         List<ElementSummary> candidates)
@@ -125,25 +128,24 @@ public class AiClient
 
         var elementList = string.Join("\n", candidates.Select(c => c.ToString()));
         var prompt = $"""
-                      You are helping a web scraper find pagination controls.
+            You are helping a web scraper find pagination controls.
+            
+            Here are the elements found on the page:
+            {elementList}
+            
+            Find the "next page" pagination button or link. It should:
+            - Have text like "Next", "→", "»", or a page number
+            - Be a navigation control, NOT a content link
+            - Stay on the same website (not link to external sites)
+            - NOT be an author name, book title, tag, or any content element
+            
+            Return ONLY the index number of the next page control.
+            Example response: 12
+            If there is no next page button, return: -1
+            Return nothing else — no explanation, no markdown, just the number.
+            """;
 
-                      Here are the elements found on the page:
-                      {elementList}
-
-                      Find the "next page" pagination button or link. It should:
-                      - Have text like "Next", "→", "»", or a page number
-                      - Be a navigation control, NOT a content link
-                      - Stay on the same website (not link to external sites like Goodreads, Amazon etc.)
-                      - NOT be an author name, book title, tag, or any content element
-
-                      Return ONLY the index number of the next page control.
-                      Example response: 12
-                      If there is no next page button, return: -1
-                      Return nothing else — no explanation, no markdown, just the number.
-                      """;
-
-        var response = await CallApiAsync(prompt);
-
+        var response = await CallApiAsync(prompt, maxTokens: 10);
         if (int.TryParse(response.Trim(), out var index) && index != -1)
             return candidates.FirstOrDefault(c => c.Index == index);
 
@@ -154,27 +156,21 @@ public class AiClient
     // API calls
     // -------------------------------------------------------------------------
 
-    private Task<string> CallApiAsync(string prompt) => _provider switch
+    private Task<string> CallApiAsync(string prompt, int maxTokens = 100) => _provider switch
     {
-        AiProvider.HuggingFace => CallHuggingFaceAsync(prompt),
-        AiProvider.Anthropic   => CallAnthropicAsync(prompt),
-        AiProvider.Ollama      => CallOllamaAsync(prompt),
-        AiProvider.Groq        => CallGroqAsync(prompt),
+        AiProvider.HuggingFace => CallHuggingFaceAsync(prompt, maxTokens),
+        AiProvider.Anthropic   => CallAnthropicAsync(prompt, maxTokens),
+        AiProvider.Ollama      => CallOllamaAsync(prompt, maxTokens),
+        AiProvider.Groq        => CallGroqAsync(prompt, maxTokens),
         _ => throw new ArgumentOutOfRangeException()
     };
 
-    private async Task<string> CallHuggingFaceAsync(string prompt)
+    private async Task<string> CallHuggingFaceAsync(string prompt, int maxTokens)
     {
-        var formattedPrompt = $"<s>[INST] {prompt} [/INST]";
         var payload = JsonSerializer.Serialize(new
         {
-            inputs = formattedPrompt,
-            parameters = new
-            {
-                max_new_tokens = 100,
-                temperature = 0.1,
-                return_full_text = false
-            }
+            inputs = $"<s>[INST] {prompt} [/INST]",
+            parameters = new { max_new_tokens = maxTokens, temperature = 0.1, return_full_text = false }
         });
 
         var endpoints = new[]
@@ -189,8 +185,8 @@ public class AiClient
             {
                 try
                 {
-                    var content = new StringContent(payload, Encoding.UTF8, "application/json");
-                    var response = await _httpClient.PostAsync(endpoint, content);
+                    var response = await _httpClient.PostAsync(endpoint,
+                        new StringContent(payload, Encoding.UTF8, "application/json"));
 
                     if ((int)response.StatusCode == 503)
                     {
@@ -202,9 +198,7 @@ public class AiClient
                     response.EnsureSuccessStatusCode();
                     var json = await response.Content.ReadAsStringAsync();
                     using var doc = JsonDocument.Parse(json);
-                    return doc.RootElement[0]
-                        .GetProperty("generated_text")
-                        .GetString() ?? "";
+                    return doc.RootElement[0].GetProperty("generated_text").GetString() ?? "";
                 }
                 catch (HttpRequestException ex)
                     when (ex.InnerException is System.Net.Sockets.SocketException)
@@ -220,19 +214,16 @@ public class AiClient
             }
         }
 
-        throw new ScraperException("[AI] Hugging Face unreachable — switch to Anthropic in Program.cs");
+        throw new ScraperException("[AI] Hugging Face unreachable");
     }
 
-    private async Task<string> CallAnthropicAsync(string prompt)
+    private async Task<string> CallAnthropicAsync(string prompt, int maxTokens)
     {
         var payload = JsonSerializer.Serialize(new
         {
-            model = _model,
-            max_tokens = 100,
-            messages = new[]
-            {
-                new { role = "user", content = prompt }
-            }
+            model    = _model,
+            max_tokens = maxTokens,
+            messages = new[] { new { role = "user", content = prompt } }
         });
 
         for (int attempt = 1; attempt <= 3; attempt++)
@@ -250,10 +241,8 @@ public class AiClient
 
                 var json = await response.Content.ReadAsStringAsync();
                 using var doc = JsonDocument.Parse(json);
-                return doc.RootElement
-                    .GetProperty("content")[0]
-                    .GetProperty("text")
-                    .GetString() ?? "";
+                return doc.RootElement.GetProperty("content")[0]
+                    .GetProperty("text").GetString() ?? "";
             }
             catch (Exception ex) when (attempt < 3)
             {
@@ -264,47 +253,33 @@ public class AiClient
 
         throw new ScraperException("[AI] Anthropic API failed after 3 attempts");
     }
-    
-    private async Task<string> CallOllamaAsync(string prompt)
+
+    private async Task<string> CallOllamaAsync(string prompt, int maxTokens)
     {
         var payload = JsonSerializer.Serialize(new
         {
-            model = _model,
-            messages = new[]
-            {
-                new { role = "user", content = prompt }
-            },
-            stream = false,
-            options = new
-            {
-                temperature = 0.1,
-                num_predict = 100
-            }
+            model    = _model,
+            messages = new[] { new { role = "user", content = prompt } },
+            stream   = false,
+            options  = new { temperature = 0.1, num_predict = maxTokens }
         });
 
         for (int attempt = 1; attempt <= 3; attempt++)
         {
             try
             {
-                var content = new StringContent(payload, Encoding.UTF8, "application/json");
                 var response = await _httpClient.PostAsync(
-                    "http://localhost:11434/api/chat", content);
+                    "http://localhost:11434/api/chat",
+                    new StringContent(payload, Encoding.UTF8, "application/json"));
 
-                // Log the actual error response so we can see what Ollama says
                 if (!response.IsSuccessStatusCode)
-                {
-                    var errorBody = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine($"[AI] Ollama error body: {errorBody}");
-                }
+                    Console.WriteLine($"[AI] Ollama error: {await response.Content.ReadAsStringAsync()}");
 
                 response.EnsureSuccessStatusCode();
                 var json = await response.Content.ReadAsStringAsync();
-
                 using var doc = JsonDocument.Parse(json);
-                return doc.RootElement
-                    .GetProperty("message")
-                    .GetProperty("content")
-                    .GetString() ?? "";
+                return doc.RootElement.GetProperty("message")
+                    .GetProperty("content").GetString() ?? "";
             }
             catch (Exception ex) when (attempt < 3)
             {
@@ -315,17 +290,14 @@ public class AiClient
 
         throw new ScraperException("[AI] Ollama failed — is it running? Try: ollama serve");
     }
-    
-    private async Task<string> CallGroqAsync(string prompt)
+
+    private async Task<string> CallGroqAsync(string prompt, int maxTokens)
     {
         var payload = JsonSerializer.Serialize(new
         {
-            model = _model,
-            messages = new[]
-            {
-                new { role = "user", content = prompt }
-            },
-            max_tokens = 100,
+            model      = _model,
+            messages   = new[] { new { role = "user", content = prompt } },
+            max_tokens = maxTokens,
             temperature = 0.1
         });
 
@@ -336,21 +308,16 @@ public class AiClient
                 var request = new HttpRequestMessage(HttpMethod.Post,
                     "https://api.groq.com/openai/v1/chat/completions");
                 request.Headers.Authorization =
-                    new System.Net.Http.Headers.AuthenticationHeaderValue(
-                        "Bearer", _apiKey);
-                request.Content = new StringContent(
-                    payload, Encoding.UTF8, "application/json");
+                    new AuthenticationHeaderValue("Bearer", _apiKey);
+                request.Content = new StringContent(payload, Encoding.UTF8, "application/json");
 
                 var response = await _httpClient.SendAsync(request);
                 response.EnsureSuccessStatusCode();
 
                 var json = await response.Content.ReadAsStringAsync();
                 using var doc = JsonDocument.Parse(json);
-                return doc.RootElement
-                    .GetProperty("choices")[0]
-                    .GetProperty("message")
-                    .GetProperty("content")
-                    .GetString() ?? "";
+                return doc.RootElement.GetProperty("choices")[0]
+                    .GetProperty("message").GetProperty("content").GetString() ?? "";
             }
             catch (Exception ex) when (attempt < 3)
             {
@@ -361,64 +328,17 @@ public class AiClient
 
         throw new ScraperException("[AI] Groq API failed after 3 attempts");
     }
-    
-    /// <summary>
-    /// Asks the AI to analyse the page HTML and return a complete extraction plan
-    /// including the container selector and field selectors for each record.
-    /// </summary>
-    public async Task<ExtractionPlan?> AnalysePageStructureAsync(
-        string pageHtml, string goal, string sampleHint = "app-accordion-guidline")
-    {
-        var sample = ExtractRepresentativeSample(pageHtml, sampleHint);
-        Console.WriteLine($"[AI] Sending {sample.Length} chars to model for analysis");
 
-        var jsonExample = """{"containerSelector":"CSS selector","fields":{"FieldName":"CSS selector"}}""";
-
-        var isGuidelineGoal = sampleHint.Contains("guidline", StringComparison.OrdinalIgnoreCase);
-
-        var fieldGuidance = isGuidelineGoal
-            ? """
-              Use EXACTLY these field names (only include ones you can find real selectors for):
-              - "Summary" for the main descriptive paragraph text
-              - "Date" for a date value (look for text that looks like a date, e.g. "27 October 1994")
-              - "Step" for step information — look specifically for text inside an <em> tag,
-                it often reads like "Step 5" or similar
-              """
-            : """
-              Use EXACTLY these field names (only include ones you can find real selectors for):
-              - "Title" for the document name or link text
-              - "Type" for any document category or type label, if present
-              """;
-
-        var prompt = $"""
-                      You are a web scraping expert. Analyse this HTML and return CSS selectors.
-
-                      Goal: Extract {goal}
-
-                      HTML sample:
-                      {sample}
-
-                      IMPORTANT: Only use class names and element names that actually appear in the HTML above.
-                      Do not invent class names. Do not return empty string selectors — omit fields you can't find.
-
-                      {fieldGuidance}
-
-                      Return ONLY this JSON structure with real selectors from the HTML:
-                      {jsonExample}
-
-                      JSON:
-                      """;
-
-        var response = await CallOllamaWithTokensAsync(prompt, maxTokens: 300);
-        return ParseExtractionPlan(response);
-    }
+    // -------------------------------------------------------------------------
+    // HTML sampling and response parsing
+    // -------------------------------------------------------------------------
 
     private static string ExtractRepresentativeSample(string html, string startMarker)
     {
         var start = html.IndexOf($"<{startMarker}", StringComparison.OrdinalIgnoreCase);
+
         if (start == -1)
         {
-            // Fall back through common markers
             foreach (var marker in new[] { "app-guideline-item", "jaspero-accord", "article" })
             {
                 start = html.IndexOf($"<{marker}", StringComparison.OrdinalIgnoreCase);
@@ -429,89 +349,32 @@ public class AiClient
                 }
             }
         }
-        else
-        {
-            Console.WriteLine($"[AI] Found sample starting at '{startMarker}'");
-        }
+        else Console.WriteLine($"[AI] Found sample starting at '{startMarker}'");
 
         if (start == -1) return html[..Math.Min(3000, html.Length)];
 
-        var end = Math.Min(start + 3000, html.Length);
+        var end      = Math.Min(start + 6000, html.Length);
         var closeTag = html.LastIndexOf('>', end);
-        return closeTag > start ? html[start..(closeTag + 1)] : html[start..end];
+        var raw      = closeTag > start ? html[start..(closeTag + 1)] : html[start..end];
+
+        return CleanAngularHtml(raw);
     }
 
-    private async Task<string> CallOllamaWithTokensAsync(string prompt, int maxTokens)
+    private static string CleanAngularHtml(string html)
     {
-        var payload = JsonSerializer.Serialize(new
-        {
-            model = _model,
-            messages = new[] { new { role = "user", content = prompt } },
-            stream = false,
-            options = new
-            {
-                temperature = 0.1,
-                num_predict = maxTokens
-            }
-        });
-
-        for (int attempt = 1; attempt <= 3; attempt++)
-        {
-            try
-            {
-                var content = new StringContent(payload, Encoding.UTF8, "application/json");
-                var response = await _httpClient.PostAsync(
-                    "http://localhost:11434/api/chat", content);
-                response.EnsureSuccessStatusCode();
-                var json = await response.Content.ReadAsStringAsync();
-                using var doc = JsonDocument.Parse(json);
-                return doc.RootElement
-                    .GetProperty("message")
-                    .GetProperty("content")
-                    .GetString() ?? "";
-            }
-            catch (Exception ex) when (attempt < 3)
-            {
-                Console.WriteLine($"[AI] Ollama attempt {attempt} failed — {ex.Message}");
-                await Task.Delay(3000 * attempt);
-            }
-        }
-        throw new ScraperException("[AI] Ollama failed after 3 attempts");
-    }
-
-    private static string ExtractRepresentativeSample(string html)
-    {
-        // Try to find app-accordion-guidline as the record container
-        var markers = new[]
-        {
-            "app-accordion-guidline",
-            "app-guideline-item",
-            "jaspero-accord",
-            ".quote",
-            "article"
-        };
-
-        foreach (var marker in markers)
-        {
-            var start = html.IndexOf($"<{marker}", StringComparison.OrdinalIgnoreCase);
-            if (start == -1) continue;
-
-            // Find a reasonable end point — take ~3000 chars from the first record
-            var end = Math.Min(start + 3000, html.Length);
-
-            // Try to close at a tag boundary
-            var closeTag = html.LastIndexOf('>', end);
-            if (closeTag > start)
-                end = closeTag + 1;
-
-            var sample = html[start..end];
-            Console.WriteLine($"[AI] Found sample starting at '{marker}'");
-            return sample;
-        }
-
-        // Fallback — take the middle section of the HTML where content usually lives
-        var mid = html.Length / 3;
-        return html[mid..Math.Min(mid + 3000, html.Length)];
+        var cleaned = System.Text.RegularExpressions.Regex.Replace(
+            html, @"\s_ngcontent-[a-z0-9\-]+""\s*=\s*""""", "");
+        cleaned = System.Text.RegularExpressions.Regex.Replace(
+            cleaned, @"\s_nghost-[a-z0-9\-]+""\s*=\s*""""", "");
+        cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"<!---->\s*", "");
+        cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"\s+ng-star-inserted", "");
+        cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"\s+ng-tns-[a-z0-9\-]+", "");
+        cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"\s+ng-trigger[a-z0-9\-]*", "");
+        cleaned = System.Text.RegularExpressions.Regex.Replace(
+            cleaned, @"\s+class=""jaspero__accord_inner[^""]*""", "");
+        cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @"\s{2,}", " ");
+        cleaned = System.Text.RegularExpressions.Regex.Replace(cleaned, @">\s+<", "><");
+        return cleaned.Trim();
     }
 
     private static ExtractionPlan? ParseExtractionPlan(string response)
@@ -520,17 +383,17 @@ public class AiClient
         try
         {
             var cleaned = response.Trim();
-            var start = cleaned.IndexOf('{');
-            var end = cleaned.LastIndexOf('}');
+            var start   = cleaned.IndexOf('{');
+            var end     = cleaned.LastIndexOf('}');
             if (start == -1 || end == -1) return null;
 
-            var json = cleaned[start..(end + 1)];
-            var plan = JsonSerializer.Deserialize<ExtractionPlan>(json,
+            var plan = JsonSerializer.Deserialize<ExtractionPlan>(
+                cleaned[start..(end + 1)],
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
             if (plan == null) return null;
 
-            // Strip out fields with empty or whitespace-only selectors
+            // Remove empty selectors — they crash the CSS parser
             plan.Fields = plan.Fields
                 .Where(f => !string.IsNullOrWhiteSpace(f.Value))
                 .ToDictionary(f => f.Key, f => f.Value);
@@ -541,32 +404,6 @@ public class AiClient
         {
             Console.WriteLine($"[AI] Failed to parse extraction plan: {ex.Message}");
             return null;
-        }
-    }
-
-    // -------------------------------------------------------------------------
-    // Response parsing
-    // -------------------------------------------------------------------------
-
-    private static List<ElementSummary> ParseIndexResponse(
-        string response, List<ElementSummary> candidates)
-    {
-        try
-        {
-            var cleaned = response.Trim();
-            var start = cleaned.IndexOf('[');
-            var end = cleaned.LastIndexOf(']');
-            if (start == -1 || end == -1) return [];
-
-            var indices = JsonSerializer.Deserialize<List<int>>(
-                cleaned[start..(end + 1)]) ?? [];
-            return candidates.Where(c => indices.Contains(c.Index)).ToList();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[AI] Failed to parse response: {ex.Message}");
-            Console.WriteLine($"[AI] Raw response: {response}");
-            return [];
         }
     }
 }

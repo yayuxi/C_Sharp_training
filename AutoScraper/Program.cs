@@ -4,18 +4,12 @@ using ScraperTemplate.Helpers;
 using ScraperTemplate.Models;
 using ScraperTemplate.Scraper;
 
-
 namespace ScraperTemplate;
 
 class Program
 {
     static async Task Main(string[] args)
     {
-        // ╔══════════════════════════════════════════════════════════════╗
-        // ║                    CONFIGURATION                            ║
-        // ║  These are the only values you need to change per scraper   ║
-        // ╚══════════════════════════════════════════════════════════════╝
-
         // ↓ URL of the index page containing category links
         const string targetUrl = "https://www.ich.org/page/ich-guidelines";
 
@@ -41,10 +35,6 @@ class Program
             "PDF files, downloadable guideline documents, " +
             "or links with class document-pdf or document-link";
 
-        // ╔══════════════════════════════════════════════════════════════╗
-        // ║              NO CHANGES NEEDED BELOW THIS LINE              ║
-        // ╚══════════════════════════════════════════════════════════════╝
-
         using var playwright = await Playwright.CreateAsync();
         await using var browser = await playwright.Chromium.LaunchAsync(
             new BrowserTypeLaunchOptions { Headless = false });
@@ -53,6 +43,99 @@ class Program
 
         var allGuidelines = new List<Guideline>();
         var allDocuments = new List<GuidelineDocument>();
+
+        // ---------------------------------------------------------------
+        // Pre-scrape actions defined once and reused across all categories
+        // ---------------------------------------------------------------
+
+        // Phase 1: open just ONE outer and ONE inner accordion for AI analysis
+        // Keeps the HTML sample small and focused so the local model can read it accurately
+        Func<IPage, Task> limitedPreScrapeAction = async (p) =>
+        {
+            await p.WaitForSelectorAsync("jaspero-accordion",
+                new PageWaitForSelectorOptions { Timeout = 15000 });
+            await p.WaitForTimeoutAsync(2000);
+
+            var outerAccords = await p.QuerySelectorAllAsync(
+                "app-accordion > jaspero-accordion > jaspero-accord");
+            if (outerAccords.Count == 0) return;
+
+            // Open only the first outer accordion
+            var firstOuter = outerAccords[0];
+            var firstOuterHeader = await firstOuter.QuerySelectorAsync("div:first-child");
+            if (firstOuterHeader != null)
+            {
+                await firstOuterHeader.ClickAsync();
+                await p.WaitForTimeoutAsync(600);
+            }
+
+            // Open only the first inner accordion inside it
+            var innerAccords = await firstOuter.QuerySelectorAllAsync(
+                "jaspero-accordion > jaspero-accord");
+            if (innerAccords.Count > 0)
+            {
+                var firstInnerHeader = await innerAccords[0].QuerySelectorAsync("div:first-child");
+                if (firstInnerHeader != null)
+                {
+                    await firstInnerHeader.ClickAsync();
+                    await p.WaitForTimeoutAsync(400);
+                }
+            }
+
+            Console.WriteLine("[PreScrape] Limited expansion — 1 outer, 1 inner open for AI analysis");
+        };
+
+        // Phase 2: expand ALL accordions for full scraping
+        Func<IPage, Task> fullPreScrapeAction = async (p) =>
+        {
+            var outerAccords = await p.QuerySelectorAllAsync(
+                "app-accordion > jaspero-accordion > jaspero-accord");
+            Console.WriteLine($"[PreScrape] Found {outerAccords.Count} outer accordions");
+
+            foreach (var outerAccord in outerAccords)
+            {
+                try
+                {
+                    // Check if already open by looking for visible inner content
+                    var alreadyOpen = await outerAccord.QuerySelectorAsync(
+                        "jaspero-accordion > jaspero-accord") != null;
+
+                    if (!alreadyOpen)
+                    {
+                        var outerHeader = await outerAccord.QuerySelectorAsync("div:first-child");
+                        if (outerHeader == null) continue;
+                        await outerHeader.ClickAsync();
+                        await p.WaitForTimeoutAsync(600);
+                    }
+
+                    var innerAccords = await outerAccord.QuerySelectorAllAsync(
+                        "jaspero-accordion > jaspero-accord");
+                    Console.WriteLine(
+                        $"[PreScrape] Expanding {innerAccords.Count} inner accordions in group...");
+
+                    foreach (var innerAccord in innerAccords)
+                    {
+                        try
+                        {
+                            // Check if inner is already open
+                            var innerContent = await innerAccord.QuerySelectorAsync(
+                                "app-accordion-guidline");
+                            if (innerContent != null) continue;
+
+                            var innerHeader = await innerAccord.QuerySelectorAsync("div:first-child");
+                            if (innerHeader == null) continue;
+                            await innerHeader.ClickAsync();
+                            await p.WaitForTimeoutAsync(300);
+                        }
+                        catch { }
+                    }
+                }
+                catch { }
+            }
+
+            await p.WaitForTimeoutAsync(1000);
+            Console.WriteLine("[PreScrape] All accordions expanded");
+        };
 
         try
         {
@@ -85,7 +168,6 @@ class Program
             await page.GotoAsync(targetUrl, new PageGotoOptions
                 { WaitUntil = WaitUntilState.NetworkIdle });
 
-            // Wait for Angular app to render the category links
             await page.WaitForSelectorAsync("app-guidelines-diagram",
                 new PageWaitForSelectorOptions { Timeout = 15000 });
             await page.WaitForTimeoutAsync(2000);
@@ -110,111 +192,17 @@ class Program
                 return;
             }
 
-            // Step 3: set up autoscraper with ICH-specific accordion expansion
-            var autoScraper = new AutoScraper(page, aiApiKey, aiProvider);
-
-            autoScraper.PreScrapeAction = async (p) =>
-            {
-                await p.WaitForSelectorAsync("jaspero-accordion",
-                    new PageWaitForSelectorOptions { Timeout = 15000 });
-                await p.WaitForTimeoutAsync(2000);
-
-                // Step 1: expand outer accordions one by one and wait for inner content
-                var outerAccords = await p.QuerySelectorAllAsync(
-                    "app-accordion > jaspero-accordion > jaspero-accord");
-                Console.WriteLine($"[PreScrape] Found {outerAccords.Count} outer accordions");
-
-                foreach (var outerAccord in outerAccords)
-                {
-                    try
-                    {
-                        // Click the header div of this specific outer accordion
-                        var outerHeader = await outerAccord.QuerySelectorAsync("div:first-child");
-                        if (outerHeader == null) continue;
-
-                        await outerHeader.ClickAsync();
-
-                        // Wait for inner jaspero-accordion to appear inside this outer accord
-                        await p.WaitForTimeoutAsync(600);
-
-                        // Step 2: expand all inner accordions within this outer accord
-                        var innerAccords = await outerAccord.QuerySelectorAllAsync(
-                            "jaspero-accordion > jaspero-accord");
-                        Console.WriteLine($"[PreScrape] Expanding {innerAccords.Count} " +
-                                          $"inner accordions in group...");
-
-                        foreach (var innerAccord in innerAccords)
-                        {
-                            try
-                            {
-                                var innerHeader = await innerAccord.QuerySelectorAsync("div:first-child");
-                                if (innerHeader == null) continue;
-
-                                await innerHeader.ClickAsync();
-                                await p.WaitForTimeoutAsync(300);
-                            }
-                            catch { /* skip unclickable inner headers */ }
-                        }
-                    }
-                    catch { /* skip unclickable outer headers */ }
-                }
-
-                // Step 3: wait for all content to fully render after expansion
-                await p.WaitForTimeoutAsync(1000);
-                Console.WriteLine("[PreScrape] All accordions expanded");
-            };
-
-            // Step 4: scrape each category page
+            // Step 3: scrape each category page
             foreach (var (categoryName, categoryUrl) in categoryUrls)
             {
                 Console.WriteLine($"\n{new string('=', 50)}");
                 Console.WriteLine($"Scraping category: {categoryName}");
                 Console.WriteLine(new string('=', 50));
-                
-                // Fresh AutoScraper per category so AI analyses each page independently
-                autoScraper = new AutoScraper(page, aiApiKey, aiProvider);
-                autoScraper.PreScrapeAction = async (p) =>
-                {
-                    await p.WaitForSelectorAsync("jaspero-accordion",
-                        new PageWaitForSelectorOptions { Timeout = 15000 });
-                    await p.WaitForTimeoutAsync(2000);
 
-                    var outerAccords = await p.QuerySelectorAllAsync(
-                        "app-accordion > jaspero-accordion > jaspero-accord");
-                    Console.WriteLine($"[PreScrape] Found {outerAccords.Count} outer accordions");
-
-                    foreach (var outerAccord in outerAccords)
-                    {
-                        try
-                        {
-                            var outerHeader = await outerAccord.QuerySelectorAsync("div:first-child");
-                            if (outerHeader == null) continue;
-                            await outerHeader.ClickAsync();
-                            await p.WaitForTimeoutAsync(600);
-
-                            var innerAccords = await outerAccord.QuerySelectorAllAsync(
-                                "jaspero-accordion > jaspero-accord");
-                            Console.WriteLine(
-                                $"[PreScrape] Expanding {innerAccords.Count} inner accordions in group...");
-
-                            foreach (var innerAccord in innerAccords)
-                            {
-                                try
-                                {
-                                    var innerHeader = await innerAccord.QuerySelectorAsync("div:first-child");
-                                    if (innerHeader == null) continue;
-                                    await innerHeader.ClickAsync();
-                                    await p.WaitForTimeoutAsync(300);
-                                }
-                                catch { }
-                            }
-                        }
-                        catch { }
-                    }
-
-                    await p.WaitForTimeoutAsync(1000);
-                    Console.WriteLine("[PreScrape] All accordions expanded");
-                };
+                // Fresh AutoScraper per category — plans reset so AI analyses each page
+                var autoScraper = new AutoScraper(page, aiApiKey, aiProvider);
+                autoScraper.PreScrapeAction = limitedPreScrapeAction;
+                autoScraper.FullExpansionAction = fullPreScrapeAction;
 
                 var (guidelines, documents) = await autoScraper.ScrapeAsync(
                     url: categoryUrl,
@@ -239,7 +227,6 @@ class Program
             CsvExporter.Export(allGuidelines, "auto_guidelines.csv");
             CsvExporter.Export(allDocuments, "auto_documents.csv");
 
-            // Record and display run history
             var tracker = new RunTracker();
             tracker.RecordRun(allGuidelines.Count, allDocuments.Count);
             tracker.PrintSummary();

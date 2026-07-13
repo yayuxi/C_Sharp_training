@@ -6,36 +6,26 @@ namespace ScraperTemplate.Scraper;
 
 /// <summary>
 /// Autonomous scraper that uses a Hugging Face model to identify
-/// document elements on unknown pages, with selector caching to
-/// avoid repeated AI calls on subsequent runs.
+/// guideline and document elements on unknown pages by creating a plan that scraping can follow.
 /// </summary>
 public class AutoScraper
 {
-    /// <summary>
-    /// Optional pre-scrape action — use this to handle JS-heavy sites that need
-    /// interaction before content is visible. Set in Program.cs per site.
-    /// </summary>
-    public Func<IPage, Task>? PreScrapeAction { get; set; }
-    
     private readonly IPage _page;
     private readonly AiClient _ai;
-    private readonly SelectorCache _cache;
     private readonly PageElementExtractor _extractor;
     
     public AutoScraper(IPage page, string apiKey, AiProvider provider = AiProvider.Ollama)
     {
         _page = page;
         _ai = new AiClient(apiKey, provider);
-        _cache = new SelectorCache("selector_cache.json");
         _extractor = new PageElementExtractor(page);
     }
-
-    /// <summary>
-    /// Scrapes both guidelines and documents from the target URL.
-    /// Uses cached selectors immediately and expands the cache via AI on each run.
-    /// </summary>
+    
     private ExtractionPlan? _guidelinePlan;
     private ExtractionPlan? _documentPlan;
+
+    public Func<IPage, Task>? PreScrapeAction { get; set; }
+    public Func<IPage, Task>? FullExpansionAction { get; set; }
 
     public async Task<(List<Guideline> Guidelines, List<GuidelineDocument> Documents)>
         ScrapeAsync(string url, string guidelineGoal, string documentGoal)
@@ -54,60 +44,53 @@ public class AutoScraper
                     { WaitUntil = WaitUntilState.NetworkIdle }),
                 _page, currentUrl, $"Loading page {pageNumber}");
 
-            if (PreScrapeAction != null)
+            // Phase 1: limited expansion for AI plan discovery
+            if (PreScrapeAction != null && (_guidelinePlan == null || _documentPlan == null))
             {
-                Console.WriteLine("[AutoScraper] Running pre-scrape action...");
+                Console.WriteLine("[AutoScraper] Phase 1 — limited expansion for AI analysis...");
                 await PreScrapeAction(_page);
-            }
 
-            // Get the rendered HTML after JS and accordions have loaded
-            var pageHtml = await _page.ContentAsync();
+                var limitedHtml = await _page.ContentAsync();
 
-            // Ask AI to build extraction plans if we don't have them yet
-            if (_guidelinePlan == null)
-            {
-                Console.WriteLine("[AutoScraper] Asking AI to analyse page for guidelines...");
-                _guidelinePlan = await TryGetExtractionPlanAsync(
-                    pageHtml, guidelineGoal, "app-accordion-guidline");
-            }
+                if (_guidelinePlan == null)
+                {
+                    Console.WriteLine("[AutoScraper] Asking AI to analyse page for guidelines...");
+                    _guidelinePlan = await TryGetExtractionPlanAsync(
+                        limitedHtml, guidelineGoal, "app-accordion-guidline");
+                    if (_guidelinePlan != null)
+                        Console.WriteLine($"[AutoScraper] Guideline plan locked in: " +
+                                          $"container='{_guidelinePlan.ContainerSelector}' " +
+                                          $"fields={string.Join(", ", _guidelinePlan.Fields.Keys)}");
+                }
 
-            if (_documentPlan == null)
-            {
-                Console.WriteLine("[AutoScraper] Asking AI to analyse page for documents...");
-                _documentPlan = await TryGetExtractionPlanAsync(pageHtml, documentGoal, "app-file-accordion");
-
-                // If AI failed, try known document selectors directly
                 if (_documentPlan == null)
                 {
-                    Console.WriteLine("[AutoScraper] AI document plan failed — trying fallback selectors...");
-                    var docFallbacks = new[]
-                    {
-                        ".document-pdf",
-                        ".document-link",
-                        "a.document-pdf, a.document-link"
-                    };
+                    Console.WriteLine("[AutoScraper] Asking AI to analyse page for documents...");
+                    _documentPlan = await TryGetExtractionPlanAsync(
+                        limitedHtml, documentGoal, "app-file-accordion");
+                    if (_documentPlan != null)
+                        Console.WriteLine($"[AutoScraper] Document plan locked in: " +
+                                          $"container='{_documentPlan.ContainerSelector}' " +
+                                          $"fields={string.Join(", ", _documentPlan.Fields.Keys)}");
+                }
 
-                    foreach (var selector in docFallbacks)
-                    {
-                        var testEl = await _page.QuerySelectorAsync(selector);
-                        if (testEl != null)
-                        {
-                            Console.WriteLine($"[AutoScraper] Document fallback selector works: '{selector}'");
-                            _documentPlan = new ExtractionPlan
-                            {
-                                ContainerSelector = ".accordion-wrapper",
-                                Fields = new Dictionary<string, string>
-                                {
-                                    ["Title"] = selector
-                                }
-                            };
-                            break;
-                        }
-                    }
+                // Phase 2: now expand everything for actual scraping
+                if (FullExpansionAction != null)
+                {
+                    Console.WriteLine("[AutoScraper] Phase 2 — full expansion for scraping...");
+                    await FullExpansionAction(_page);
                 }
             }
+            else if (FullExpansionAction != null)
+            {
+                // Plans already known — go straight to full expansion
+                Console.WriteLine("[AutoScraper] Plans already known — full expansion...");
+                await FullExpansionAction(_page);
+            }
 
-            // Extract guidelines using the AI's plan
+            var pageHtml = await _page.ContentAsync();
+
+            // Extract guidelines
             if (_guidelinePlan != null)
             {
                 var pageGuidelines = await ExtractWithPlanAsync(
@@ -117,9 +100,9 @@ public class AutoScraper
                                   $"{pageGuidelines.Count} guidelines scraped");
             }
             else
-                Console.WriteLine("[AutoScraper] No guideline plan yet — run again");
+                Console.WriteLine("[AutoScraper] No guideline plan yet");
 
-            // Extract documents using the AI's plan
+            // Extract documents
             if (_documentPlan != null)
             {
                 var pageDocs = await ExtractWithPlanAsync(
@@ -129,7 +112,7 @@ public class AutoScraper
                                   $"{pageDocs.Count} documents scraped");
             }
             else
-                Console.WriteLine("[AutoScraper] No document plan yet — run again");
+                Console.WriteLine("[AutoScraper] No document plan yet");
 
             Console.WriteLine($"[AutoScraper] Running totals — " +
                               $"guidelines: {allGuidelines.Count}, " +
@@ -236,7 +219,7 @@ public class AutoScraper
                         }
                     }
                 }
-
+            
                 // Date fallback
                 if (!workingFields.ContainsKey("Date"))
                 {
@@ -261,7 +244,7 @@ public class AutoScraper
                         }
                     }
                 }
-
+            
                 // Step fallback
                 if (!workingFields.ContainsKey("Step"))
                 {
@@ -294,7 +277,7 @@ public class AutoScraper
                     ".document-link",
                     "a.document-pdf, a.document-link"
                 };
-
+            
                 foreach (var selector in docFallbacks)
                 {
                     var testEl = await _page.QuerySelectorAsync(selector);
@@ -543,110 +526,11 @@ public class AutoScraper
         if (step.Contains("5")) return "Finalised";
         return "Under Development";
     }
-
-    // -------------------------------------------------------------------------
-    // Extraction from cached selectors
-    // -------------------------------------------------------------------------
-
-    private async Task<List<Guideline>> ExtractGuidelinesFromSelectorsAsync(
-        List<ElementSummary> cachedElements, string currentUrl)
-    {
-        var guidelines = new List<Guideline>();
-        var seenTexts = new HashSet<string>(); // prevent duplicates within a page
-
-        foreach (var cached in cachedElements)
-        {
-            try
-            {
-                // A selector like "span.text" matches ALL quotes on the page
-                // so we query all matching elements, not just the first
-                var elements = await _page.QuerySelectorAllAsync(cached.Selector);
-
-                foreach (var element in elements)
-                {
-                    if (!await element.IsVisibleAsync()) continue;
-
-                    var text = (await element.InnerTextAsync()).Trim();
-                    if (string.IsNullOrWhiteSpace(text)) continue;
-
-                    // Skip duplicates
-                    if (!seenTexts.Add(text)) continue;
-
-                    guidelines.Add(new Guideline
-                    {
-                        GuidelineCode = "",
-                        Title = text,
-                        Category = "",
-                        Step = "",
-                        Status = "",
-                        Dated = DateTime.MinValue,
-                        Summary = "",
-                        SourceUrl = currentUrl
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(
-                    $"[AutoScraper] Guideline selector failed: {cached.Selector} — {ex.Message}");
-            }
-        }
-
-        return guidelines;
-    }
-
-    private async Task<List<GuidelineDocument>> ExtractDocumentsFromSelectorsAsync(
-        List<ElementSummary> cachedElements, string currentUrl)
-    {
-        var documents = new List<GuidelineDocument>();
-
-        foreach (var cached in cachedElements)
-        {
-            try
-            {
-                var element = await _page.QuerySelectorAsync(cached.Selector);
-                if (element == null || !await element.IsVisibleAsync()) continue;
-
-                var text = (await element.InnerTextAsync()).Trim();
-                var href = await element.GetAttributeAsync("href") ?? cached.Href;
-                var cssClass = await element.GetAttributeAsync("class") ?? cached.CssClass;
-
-                if (string.IsNullOrWhiteSpace(href)) continue;
-
-                var docUrl = href.StartsWith("http")
-                    ? href
-                    : $"{new Uri(currentUrl).GetLeftPart(UriPartial.Authority)}{href}";
-
-                documents.Add(new GuidelineDocument
-                {
-                    GuidelineCode = "",
-                    DocumentTitle = text,
-                    DocumentUrl = docUrl,
-                    DocumentType = InferDocumentType(cssClass, href),
-                    FileFormat = InferFileFormat(cssClass, href)
-                });
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(
-                    $"[AutoScraper] Document selector failed: {cached.Selector} — {ex.Message}");
-            }
-        }
-
-        return documents;
-    }
+    
 
     // -------------------------------------------------------------------------
     // Helpers
     // -------------------------------------------------------------------------
-
-    private static string InferDocumentType(string cssClass, string href)
-    {
-        if (cssClass.Contains("pdf")) return "PDF Document";
-        if (href.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)) return "PDF Document";
-        if (cssClass.Contains("link")) return "Web Page";
-        return "Document";
-    }
 
     private static string InferFileFormat(string cssClass, string href)
     {
